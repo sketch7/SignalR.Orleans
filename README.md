@@ -3,9 +3,8 @@
   <h1>Sketch7 SignalR.Orleans</h1><small>fork from <a href="https://github.com/OrleansContrib/SignalR.Orleans">OrleansContrib/SignalR.Orleans</a></small>
 </p>
 
-[![Build status](https://dotnet-ci.visualstudio.com/DotnetCI/_apis/build/status/SignalR-Orleans-CI?branch=master)](https://dotnet-ci.visualstudio.com/DotnetCI/_build/latest?definitionId=1&branch=master)
-[![NuGet](https://img.shields.io/nuget/v/SignalR.Orleans.svg?style=flat)](http://www.nuget.org/packages/SignalR.Orleans)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![CircleCI](https://circleci.com/gh/sketch7/Sketch7.SignalR.Orleans.svg?style=shield)](https://circleci.com/gh/sketch7/Sketch7.SignalR.Orleans)
+[![NuGet version](https://badge.fury.io/nu/Sketch7.SignalR.Orleans.svg)](https://badge.fury.io/nu/Sketch7.SignalR.Orleans)
 
 [Orleans](https://github.com/dotnet/orleans) is a framework that provides a straight-forward approach to building distributed high-scale computing applications, without the need to learn and apply complex concurrency or other scaling patterns. 
 
