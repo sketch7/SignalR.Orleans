@@ -105,7 +105,7 @@ namespace SignalR.Orleans.Clients
 
         private void SetupStreams()
         {
-            _serverStream = _streamProvider.GetStream<ClientMessage>(State.ServerId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
+            _serverStream = _streamProvider.GetStreamReplicaRandom<ClientMessage>(State.ServerId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
             _serverDisconnectedStream = _streamProvider.GetStream<Guid>(State.ServerId, Constants.SERVER_DISCONNECTED);
         }
     }
