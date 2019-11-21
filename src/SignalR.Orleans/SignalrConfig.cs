@@ -3,17 +3,6 @@ using System;
 
 namespace SignalR.Orleans
 {
-    //public class SignalrOrleansOptions
-    //{
-    //    /// <summary>
-    //    /// Gets or sets the amount of stream replicas.
-    //    /// </summary>
-    //    public int StreamSendReplicas { get; set; } = 5;
-
-    //    public void From(SignalrOrleansConfigBaseBuilder builder)
-    //        => StreamSendReplicas = builder.StreamSendReplicas;
-    //}
-
     public class HostBuilderConfig
     {
         /// <summary>
@@ -30,11 +19,6 @@ namespace SignalR.Orleans
     public class SignalrOrleansConfigBaseBuilder
     {
         public bool UseFireAndForgetDelivery { get; set; }
-
-        ///// <summary>
-        ///// Gets or sets the amount of stream replicas.
-        ///// </summary>
-        //public int StreamSendReplicas { get; set; } = 5;
     }
 
     public class SignalrOrleansSiloConfigBuilder : SignalrOrleansConfigBaseBuilder
