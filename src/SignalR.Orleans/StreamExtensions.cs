@@ -27,7 +27,7 @@ namespace SignalR.Orleans
         /// <param name="replicas">Max replicas to obtain stream from.</param>
         /// <returns></returns>
         public static IAsyncStream<T> GetStreamReplicaRandom<T>(this IStreamProvider streamProvider, Guid streamId, string streamNamespace, int replicas)
-            => streamProvider.GetStream<T>(BuildReplicaStreamName(streamId, Randomizer.Next(0, replicas + 1)), streamNamespace);
+            => streamProvider.GetStream<T>(BuildReplicaStreamName(streamId, Randomizer.Next(0, replicas)), streamNamespace);
     }
 
     /// <summary>
@@ -58,7 +58,10 @@ namespace SignalR.Orleans
             MaxReplicas = maxReplicas;
 
             for (int i = 0; i < maxReplicas; i++)
-                _streams.Add(streamProvider.GetStream<T>(StreamReplicaExtensions.BuildReplicaStreamName(streamId, i), streamNamespace));
+            {
+                var streamIdReplica = StreamReplicaExtensions.BuildReplicaStreamName(streamId, i);
+                _streams.Add(streamProvider.GetStream<T>(streamIdReplica, streamNamespace));
+            }
         }
 
         public StreamReplicaContainer(IStreamProvider streamProvider, Guid streamId, string streamNamespace,
