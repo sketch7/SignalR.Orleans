@@ -51,7 +51,6 @@ namespace SignalR.Orleans
         /// <param name="streamId"></param>
         /// <param name="streamNamespace"></param>
         /// <param name="maxReplicas">Max replicas to create.</param>
-
         public StreamReplicaContainer(IStreamProvider streamProvider, string streamId, string streamNamespace, int maxReplicas)
         {
             StreamId = streamId;
