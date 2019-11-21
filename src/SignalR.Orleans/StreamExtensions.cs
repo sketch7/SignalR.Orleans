@@ -44,7 +44,6 @@ namespace SignalR.Orleans
 
         private readonly List<IAsyncStream<T>> _streams = new List<IAsyncStream<T>>();
 
-
         /// <summary>
         /// Create a new instance of stream with replicas.
         /// </summary>
