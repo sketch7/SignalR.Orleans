@@ -26,6 +26,7 @@ namespace SignalR.Orleans
         private IAsyncStream<AllMessage> _allStream;
         private readonly string _hubName;
         private readonly SemaphoreSlim _streamSetupLock = new SemaphoreSlim(1);
+        private StreamReplicaContainer<ClientMessage> _serverStreamsReplicaContainer;
 
         public OrleansHubLifetimeManager(
             ILogger<OrleansHubLifetimeManager<THub>> logger,
@@ -73,13 +74,16 @@ namespace SignalR.Orleans
 
             _streamProvider = _clusterClientProvider.GetClient().GetStreamProvider(Constants.STREAM_PROVIDER);
             _serverStream = _streamProvider.GetStream<ClientMessage>(_serverId, Constants.SERVERS_STREAM);
+
+            _serverStreamsReplicaContainer = new StreamReplicaContainer<ClientMessage>(_streamProvider, _serverId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
+
             _allStream = _streamProvider.GetStream<AllMessage>(Constants.ALL_STREAM_ID, Utils.BuildStreamHubName(_hubName));
             _timer = new Timer(_ => Task.Run(HeartbeatCheck), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Constants.HEARTBEAT_PULSE_IN_MINUTES));
 
             var subscribeTasks = new List<Task>
             {
                 _allStream.SubscribeAsync((msg, _) => ProcessAllMessage(msg)),
-                _serverStream.SubscribeAsync((msg, _) => ProcessServerMessage(msg))
+                _serverStreamsReplicaContainer.SubscribeAsync((msg, _) => ProcessServerMessage(msg))
             };
 
             await Task.WhenAll(subscribeTasks);

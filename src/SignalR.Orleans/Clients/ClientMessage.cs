@@ -7,5 +7,8 @@ namespace SignalR.Orleans.Clients
         public string HubName { get; set; }
         public string ConnectionId { get; set; }
         public InvocationMessage Payload { get; set; }
+
+        public static string GetStreamId(string serverId, int replica)
+            => $"{serverId}::{replica}";
     }
 }
