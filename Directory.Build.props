@@ -41,5 +41,6 @@
     <!-- vendors -->
     <OrleansVersion>2.3.5</OrleansVersion>
     <SignalRVersion>1.1.0</SignalRVersion>
+    <OrleansStreamsUtilsVersion>8.0.0</OrleansStreamsUtilsVersion>
   </PropertyGroup>
 </Project>
