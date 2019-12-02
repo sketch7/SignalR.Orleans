@@ -9,6 +9,10 @@
 - **client:** handle subscribe correctly for `server-disconnected`
 - **connection:** remove `Task` pooling and instead use one way invokes - was noticing timeouts stating after 30sec before 30sec (e.g. ~100ms) in several cases
 
+### BREAKING CHANGES
+
+- **connection:** `Send*` will not await a response and now its fire and forget
+
 ## [1.0.0-rc2](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc1...1.0.0-rc2) (2019-11-22)
 
 ### Features
