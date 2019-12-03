@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Streams;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace SignalR.Orleans.Core
                 var subscriptions = await clientDisconnectStream.GetAllSubscriptionHandles();
                 foreach (var subscription in subscriptions)
                 {
-                    subscriptionTasks.Add(subscription.ResumeAsync(async (connectionId, _) => await Remove(connectionId)));
+                    subscriptionTasks.Add(subscription.ResumeAsync((connectionId, _) => RemoveDeferred(connectionId)));
                 }
             }
             await Task.WhenAll(subscriptionTasks);
@@ -47,7 +48,7 @@ namespace SignalR.Orleans.Core
             if (!_connectionStreamHandles.ContainsKey(connectionId))
             {
                 var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
-                var subscription = await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
+                var subscription = await clientDisconnectStream.SubscribeAsync((connId, _) => RemoveDeferred(connId));
                 _connectionStreamHandles.Add(connectionId, subscription);
             }
 
@@ -100,6 +101,15 @@ namespace SignalR.Orleans.Core
 
             return Task.CompletedTask;
         }
+
+        private Task RemoveDeferred(string connectionId)
+        {
+            RegisterTimerOnce(_ => Remove(connectionId), null, TimeSpan.FromMilliseconds(0));
+            return Task.CompletedTask;
+        }
+
+        protected IDisposable RegisterTimerOnce(Func<object, Task> asyncCallback, object state, TimeSpan dueTime)
+            => RegisterTimer(asyncCallback, state, dueTime, TimeSpan.FromMilliseconds(-1));
     }
 
     internal abstract class ConnectionState
