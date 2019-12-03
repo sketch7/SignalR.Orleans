@@ -1,12 +1,12 @@
-﻿using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR.Protocol;
+﻿using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Streams;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SignalR.Orleans.Core
 {
@@ -36,7 +36,7 @@ namespace SignalR.Orleans.Core
                 var subscriptions = await clientDisconnectStream.GetAllSubscriptionHandles();
                 foreach (var subscription in subscriptions)
                 {
-                    subscriptionTasks.Add(subscription.ResumeAsync(async (connectionId, _) => await Remove(connectionId)));
+                    subscriptionTasks.Add(subscription.ResumeAsync((connectionId, _) => RemoveDeferred(connectionId)));
                 }
             }
             await Task.WhenAll(subscriptionTasks);
@@ -48,8 +48,8 @@ namespace SignalR.Orleans.Core
             if (!_connectionStreamHandles.ContainsKey(connectionId))
             {
                 var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
-                var subscription = await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
-                _connectionStreamHandles[connectionId] = subscription;
+                var subscription = await clientDisconnectStream.SubscribeAsync((connId, _) => RemoveDeferred(connId));
+                _connectionStreamHandles.Add(connectionId, subscription);
             }
 
             if (shouldWriteState)
@@ -77,9 +77,7 @@ namespace SignalR.Orleans.Core
         }
 
         public virtual Task Send(Immutable<InvocationMessage> message)
-        {
-            return SendAll(message, State.Connections);
-        }
+            => SendAll(message, State.Connections);
 
         public Task SendExcept(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds)
         {
@@ -88,32 +86,30 @@ namespace SignalR.Orleans.Core
         }
 
         public Task<int> Count()
-        {
-            return Task.FromResult(State.Connections.Count);
-        }
+            => Task.FromResult(State.Connections.Count);
 
         protected Task SendAll(Immutable<InvocationMessage> message, IReadOnlyCollection<string> connections)
         {
             _logger.LogDebug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
                 KeyData.HubName, message.Value.Target, KeyData.Id, connections.Count);
 
-            var tasks = ArrayPool<Task>.Shared.Rent(connections.Count);
-            try
+            foreach (var connection in connections)
             {
-                int index = 0;
-                foreach (var connection in connections)
-                {
-                    var client = GrainFactory.GetClientGrain(KeyData.HubName, connection);
-                    tasks[index++] = client.Send(message);
-                }
+                GrainFactory.GetClientGrain(KeyData.HubName, connection)
+                    .InvokeOneWay(x => x.Send(message));
+            }
 
-                return Task.WhenAll(tasks.Where(x => x != null).ToArray());
-            }
-            finally
-            {
-                ArrayPool<Task>.Shared.Return(tasks);
-            }
+            return Task.CompletedTask;
         }
+
+        private Task RemoveDeferred(string connectionId)
+        {
+            RegisterTimerOnce(_ => Remove(connectionId), null, TimeSpan.FromMilliseconds(0));
+            return Task.CompletedTask;
+        }
+
+        protected IDisposable RegisterTimerOnce(Func<object, Task> asyncCallback, object state, TimeSpan dueTime)
+            => RegisterTimer(asyncCallback, state, dueTime, TimeSpan.FromMilliseconds(-1));
     }
 
     internal abstract class ConnectionState

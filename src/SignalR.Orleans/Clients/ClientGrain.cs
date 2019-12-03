@@ -27,7 +27,6 @@ namespace SignalR.Orleans.Clients
         private IStreamProvider _streamProvider;
         private IAsyncStream<ClientMessage> _serverStream;
         private IAsyncStream<Guid> _serverDisconnectedStream;
-        private IAsyncStream<string> _clientDisconnectStream;
         private ConnectionGrainKey _keyData;
         private StreamSubscriptionHandle<Guid> _serverDisconnectedSubscription;
         private const int _maxFailAttempts = 3;
@@ -42,18 +41,18 @@ namespace SignalR.Orleans.Clients
         {
             _keyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
             _streamProvider = GetStreamProvider(Constants.STREAM_PROVIDER);
-            _clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, _keyData.Id);
 
             if (State.ServerId == Guid.Empty)
                 return;
 
             SetupStreams();
             var subscriptions = await _serverDisconnectedStream.GetAllSubscriptionHandles();
-            var subscriptionTasks = new List<Task>();
+            if (subscriptions.Count == 0)
+                return;
+
+            var subscriptionTasks = new List<Task>(subscriptions.Count);
             foreach (var subscription in subscriptions)
-            {
                 subscriptionTasks.Add(subscription.ResumeAsync(async (serverId, _) => await OnDisconnect("server-disconnected")));
-            }
             await Task.WhenAll(subscriptionTasks);
         }
 
@@ -82,7 +81,7 @@ namespace SignalR.Orleans.Clients
         {
             State.ServerId = serverId;
             SetupStreams();
-            _serverDisconnectedSubscription = await _serverDisconnectedStream.SubscribeAsync(async _ => await OnDisconnect("server-disconnected"));
+            _serverDisconnectedSubscription = await _serverDisconnectedStream.SubscribeAsync(async (connId, _) => await OnDisconnect("server-disconnected"));
             await WriteStateAsync();
         }
 
@@ -93,7 +92,8 @@ namespace SignalR.Orleans.Clients
 
             if (_keyData.Id != null)
             {
-                await _clientDisconnectStream.OnNextAsync(_keyData.Id);
+                var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, _keyData.Id);
+                await clientDisconnectStream.OnNextAsync(_keyData.Id);
             }
             await ClearStateAsync();
 
