@@ -6,8 +6,8 @@ using Orleans.Providers;
 using Orleans.Streams;
 using SignalR.Orleans.Core;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SignalR.Orleans.Clients
@@ -47,13 +47,9 @@ namespace SignalR.Orleans.Clients
 
             SetupStreams();
             var subscriptions = await _serverDisconnectedStream.GetAllSubscriptionHandles();
-            if (subscriptions.Count == 0)
-                return;
-
-            var subscriptionTasks = new List<Task>(subscriptions.Count);
-            foreach (var subscription in subscriptions)
-                subscriptionTasks.Add(subscription.ResumeAsync(async (serverId, _) => await OnDisconnect("server-disconnected")));
-            await Task.WhenAll(subscriptionTasks);
+            var subscription = subscriptions.FirstOrDefault();
+            if (subscription != null)
+                _serverDisconnectedSubscription = await subscription.ResumeAsync(async (serverId, _) => await OnDisconnect("server-disconnected"));
         }
 
         public async Task Send(Immutable<InvocationMessage> message)
