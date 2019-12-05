@@ -16,8 +16,11 @@ namespace SignalR.Orleans.Core
         private readonly ILogger _logger;
         private IStreamProvider _streamProvider;
         private Dictionary<string, StreamSubscriptionHandle<string>> _connectionStreamHandles;
+        private readonly List<StreamSubscriptionHandle<string>> _streamToUnsubscribe = new List<StreamSubscriptionHandle<string>>();
+        private readonly TimeSpan _cleanupPeriod = TimeSpan.Parse(Constants.CONNECTION_STREAM_CLEANUP);
 
         protected ConnectionGrainKey KeyData;
+        private IDisposable _cleanupTimer;
 
         internal ConnectionGrain(ILogger logger)
         {
@@ -27,19 +30,39 @@ namespace SignalR.Orleans.Core
         public override async Task OnActivateAsync()
         {
             KeyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
-            _connectionStreamHandles = new Dictionary<string, StreamSubscriptionHandle<string>>();
             _streamProvider = GetStreamProvider(Constants.STREAM_PROVIDER);
-            var subscriptionTasks = new List<Task>();
+
+            _cleanupTimer = RegisterTimer(
+                _ => CleanupStreams(),
+                State,
+                _cleanupPeriod,
+                _cleanupPeriod);
+
+            if (State.Connections.Count == 0)
+            {
+                _connectionStreamHandles = new Dictionary<string, StreamSubscriptionHandle<string>>();
+                return;
+            }
+
+            var subscriptionTasks = new Dictionary<string, Task<StreamSubscriptionHandle<string>>>();
             foreach (var connection in State.Connections)
             {
                 var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connection);
                 var subscriptions = await clientDisconnectStream.GetAllSubscriptionHandles();
-                foreach (var subscription in subscriptions)
-                {
-                    subscriptionTasks.Add(subscription.ResumeAsync((connectionId, _) => RemoveDeferred(connectionId)));
-                }
+                var subscription = subscriptions.FirstOrDefault();
+                if (subscription == null)
+                    continue;
+                subscriptionTasks.Add(connection, subscription.ResumeAsync(async (connectionId, _) => await Remove(connectionId)));
             }
-            await Task.WhenAll(subscriptionTasks);
+            await Task.WhenAll(subscriptionTasks.Values);
+
+            _connectionStreamHandles = subscriptionTasks.ToDictionary(x => x.Key, x => x.Value.Result);
+        }
+
+        public override Task OnDeactivateAsync()
+        {
+            _cleanupTimer?.Dispose();
+            return CleanupStreams();
         }
 
         public virtual async Task Add(string connectionId)
@@ -48,7 +71,7 @@ namespace SignalR.Orleans.Core
             if (!_connectionStreamHandles.ContainsKey(connectionId))
             {
                 var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
-                var subscription = await clientDisconnectStream.SubscribeAsync((connId, _) => RemoveDeferred(connId));
+                var subscription = await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
                 _connectionStreamHandles.Add(connectionId, subscription);
             }
 
@@ -61,14 +84,13 @@ namespace SignalR.Orleans.Core
             var shouldWriteState = State.Connections.Remove(connectionId);
             if (_connectionStreamHandles.TryGetValue(connectionId, out var stream))
             {
-                await stream.UnsubscribeAsync();
+                _streamToUnsubscribe.Add(stream);
                 _connectionStreamHandles.Remove(connectionId);
             }
 
             if (State.Connections.Count == 0)
             {
                 await ClearStateAsync();
-                DeactivateOnIdle();
             }
             else if (shouldWriteState)
             {
@@ -102,14 +124,15 @@ namespace SignalR.Orleans.Core
             return Task.CompletedTask;
         }
 
-        private Task RemoveDeferred(string connectionId)
+        private async Task CleanupStreams()
         {
-            RegisterTimerOnce(_ => Remove(connectionId), null, TimeSpan.FromMilliseconds(0));
-            return Task.CompletedTask;
+            if (_streamToUnsubscribe.Count > 0)
+            {
+                var unsubscribes = _streamToUnsubscribe.Select(x => x.UnsubscribeAsync()).ToList();
+                await Task.WhenAll(unsubscribes);
+                _streamToUnsubscribe.Clear();
+            }
         }
-
-        protected IDisposable RegisterTimerOnce(Func<object, Task> asyncCallback, object state, TimeSpan dueTime)
-            => RegisterTimer(asyncCallback, state, dueTime, TimeSpan.FromMilliseconds(-1));
     }
 
     internal abstract class ConnectionState

@@ -2,11 +2,20 @@
 
 [_vNext_](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0...1.1.0) (2019-X-X)
 
+## [1.0.0-rc5](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc4...1.0.0-rc5) (2019-12-05)
+
+### Bug Fixes
+
+- **server directory:** dispose timer on deactivate
+- **connection:** cleanup streams via timer instead of deferred timer (since it was timing out PubSub) and not triggering deactivation on connection remove
+- **connection:** cleanup streams subscriptions when resume
+- **client:** cleanup streams subscriptions when resume
+
 ## [1.0.0-rc4](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc3...1.0.0-rc4) (2019-12-04)
 
 ### Bug Fixes
 
-- **connection:** fix key parsing when key was containing `:` group was incorrect (only used for logs)
+- **connection:** fix key parsing when key was containing `:` group was incorrect
 
 ## [1.0.0-rc3](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc2...1.0.0-rc3) (2019-12-03)
 
