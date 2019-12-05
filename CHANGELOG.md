@@ -2,6 +2,12 @@
 
 [_vNext_](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0...1.1.0) (2019-X-X)
 
+## [1.0.0-rc4](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc3...1.0.0-rc4) (2019-12-04)
+
+### Bug Fixes
+
+- **connection:** fix key parsing when key was containing `:` group was incorrect (only used for logs)
+
 ## [1.0.0-rc3](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc2...1.0.0-rc3) (2019-12-03)
 
 ### Bug Fixes
