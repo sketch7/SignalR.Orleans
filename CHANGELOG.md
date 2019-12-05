@@ -6,7 +6,7 @@
 
 ### Bug Fixes
 
-- **connection:** fix key parsing when key was containing `:` group was incorrect
+- **connection:** fix key parsing when key was containing `:` group was incorrect (only used for logs)
 
 ## [1.0.0-rc3](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc2...1.0.0-rc3) (2019-12-03)
 
