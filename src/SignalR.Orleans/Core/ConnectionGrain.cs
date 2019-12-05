@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Streams;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,8 +17,10 @@ namespace SignalR.Orleans.Core
         private IStreamProvider _streamProvider;
         private Dictionary<string, StreamSubscriptionHandle<string>> _connectionStreamHandles;
         private readonly List<StreamSubscriptionHandle<string>> _streamToUnsubscribe = new List<StreamSubscriptionHandle<string>>();
+        private readonly TimeSpan _cleanupPeriod = TimeSpan.Parse(Constants.CONNECTION_STREAM_CLEANUP);
 
         protected ConnectionGrainKey KeyData;
+        private IDisposable _cleanupTimer;
 
         internal ConnectionGrain(ILogger logger)
         {
@@ -28,6 +31,12 @@ namespace SignalR.Orleans.Core
         {
             KeyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
             _streamProvider = GetStreamProvider(Constants.STREAM_PROVIDER);
+
+            _cleanupTimer = RegisterTimer(
+                _ => CleanupStreams(),
+                State,
+                _cleanupPeriod,
+                _cleanupPeriod);
 
             if (State.Connections.Count == 0)
             {
@@ -50,13 +59,10 @@ namespace SignalR.Orleans.Core
             _connectionStreamHandles = subscriptionTasks.ToDictionary(x => x.Key, x => x.Value.Result);
         }
 
-        public override async Task OnDeactivateAsync()
+        public override Task OnDeactivateAsync()
         {
-            if (_streamToUnsubscribe.Count > 0)
-            {
-                var unsubscribes = _streamToUnsubscribe.Select(x => x.UnsubscribeAsync()).ToList();
-                await Task.WhenAll(unsubscribes);
-            }
+            _cleanupTimer?.Dispose();
+            return CleanupStreams();
         }
 
         public virtual async Task Add(string connectionId)
@@ -85,7 +91,6 @@ namespace SignalR.Orleans.Core
             if (State.Connections.Count == 0)
             {
                 await ClearStateAsync();
-                DeactivateOnIdle();
             }
             else if (shouldWriteState)
             {
@@ -117,6 +122,16 @@ namespace SignalR.Orleans.Core
             }
 
             return Task.CompletedTask;
+        }
+
+        private async Task CleanupStreams()
+        {
+            if (_streamToUnsubscribe.Count > 0)
+            {
+                var unsubscribes = _streamToUnsubscribe.Select(x => x.UnsubscribeAsync()).ToList();
+                await Task.WhenAll(unsubscribes);
+                _streamToUnsubscribe.Clear();
+            }
         }
     }
 
