@@ -20,13 +20,6 @@ namespace SignalR.Orleans.Clients
         public Guid ServerId { get; set; }
     }
 
-    public static class ClientDisconnectReasons
-    {
-        public const string HubDisconnect = "hub-disconnect";
-        public const string ServerDisconnected = "server-disconnected";
-        public const string AttemptsLimitReached = "attempts-limit-reached";
-    }
-
     [StorageProvider(ProviderName = Constants.STORAGE_PROVIDER)]
     internal class ClientGrain : Grain<ClientState>, IClientGrain
     {
