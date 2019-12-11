@@ -4,10 +4,6 @@
 
 ## [1.0.0-rc6](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc5...1.0.0-rc6) (2019-12-11)
 
-### Features
-
-- **client:** add `ClientDisconnectReasons` class
-
 ### Bug Fixes
 
 - **client:** only clean Client Grain state when `hub-disconnect` gracefully, otherwise don't so it might be possible to recover grain - if for some reason the hub connection is still active but the grain doesn't
