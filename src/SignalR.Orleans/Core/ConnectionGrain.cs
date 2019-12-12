@@ -15,8 +15,7 @@ namespace SignalR.Orleans.Core
     {
         private readonly ILogger _logger;
         private IStreamProvider _streamProvider;
-        private Dictionary<string, StreamSubscriptionHandle<string>> _connectionStreamHandles;
-        private readonly List<StreamSubscriptionHandle<string>> _streamToUnsubscribe = new List<StreamSubscriptionHandle<string>>();
+        private readonly HashSet<string> _connectionStreamToUnsubscribe = new HashSet<string>();
         private readonly TimeSpan _cleanupPeriod = TimeSpan.Parse(Constants.CONNECTION_STREAM_CLEANUP);
 
         protected ConnectionGrainKey KeyData;
@@ -40,14 +39,13 @@ namespace SignalR.Orleans.Core
 
             if (State.Connections.Count == 0)
             {
-                _connectionStreamHandles = new Dictionary<string, StreamSubscriptionHandle<string>>();
                 return;
             }
 
             var subscriptionTasks = new Dictionary<string, Task<StreamSubscriptionHandle<string>>>();
             foreach (var connection in State.Connections)
             {
-                var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connection);
+                var clientDisconnectStream = GetClientDisconnectStream(connection);
                 var subscriptions = await clientDisconnectStream.GetAllSubscriptionHandles();
                 var subscription = subscriptions.FirstOrDefault();
                 if (subscription == null)
@@ -55,8 +53,6 @@ namespace SignalR.Orleans.Core
                 subscriptionTasks.Add(connection, subscription.ResumeAsync(async (connectionId, _) => await Remove(connectionId)));
             }
             await Task.WhenAll(subscriptionTasks.Values);
-
-            _connectionStreamHandles = subscriptionTasks.ToDictionary(x => x.Key, x => x.Value.Result);
         }
 
         public override Task OnDeactivateAsync()
@@ -67,26 +63,18 @@ namespace SignalR.Orleans.Core
 
         public virtual async Task Add(string connectionId)
         {
-            var shouldWriteState = State.Connections.Add(connectionId);
-            if (!_connectionStreamHandles.ContainsKey(connectionId))
-            {
-                var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
-                var subscription = await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
-                _connectionStreamHandles.Add(connectionId, subscription);
-            }
+            if (!State.Connections.Add(connectionId))
+                return;
 
-            if (shouldWriteState)
-                await WriteStateAsync();
+            var clientDisconnectStream = GetClientDisconnectStream(connectionId);
+            await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
+            await WriteStateAsync();
         }
 
         public virtual async Task Remove(string connectionId)
         {
             var shouldWriteState = State.Connections.Remove(connectionId);
-            if (_connectionStreamHandles.TryGetValue(connectionId, out var stream))
-            {
-                _streamToUnsubscribe.Add(stream);
-                _connectionStreamHandles.Remove(connectionId);
-            }
+            _connectionStreamToUnsubscribe.Add(connectionId);
 
             if (State.Connections.Count == 0)
             {
@@ -126,13 +114,20 @@ namespace SignalR.Orleans.Core
 
         private async Task CleanupStreams()
         {
-            if (_streamToUnsubscribe.Count > 0)
+            if (_connectionStreamToUnsubscribe.Count > 0)
             {
-                var unsubscribes = _streamToUnsubscribe.Select(x => x.UnsubscribeAsync()).ToList();
-                await Task.WhenAll(unsubscribes);
-                _streamToUnsubscribe.Clear();
+                foreach (var connectionId in _connectionStreamToUnsubscribe.ToList())
+                {
+                    var handles = await GetClientDisconnectStream(connectionId).GetAllSubscriptionHandles();
+                    var unsubscribes = handles.Select(x => x.UnsubscribeAsync()).ToList();
+                    await Task.WhenAll(unsubscribes);
+                    _connectionStreamToUnsubscribe.Remove(connectionId);
+                }
             }
         }
+
+        private IAsyncStream<string> GetClientDisconnectStream(string connectionId)
+            => _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
     }
 
     internal abstract class ConnectionState
