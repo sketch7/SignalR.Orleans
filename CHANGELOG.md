@@ -2,6 +2,12 @@
 
 [_vNext_](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0...1.1.0) (2019-X-X)
 
+## [1.0.0-rc7](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc6...1.0.0-rc7) (2020-01-17)
+
+### Features
+
+- **client:** Add logs on `OnConnectedAsync`
+
 ## [1.0.0-rc6](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0-rc5...1.0.0-rc6) (2019-12-11)
 
 ### Bug Fixes
