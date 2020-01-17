@@ -123,6 +123,9 @@ namespace SignalR.Orleans
                 var client = _clusterClientProvider.GetClient().GetClientGrain(_hubName, connection.ConnectionId);
                 await client.OnConnect(_serverId);
 
+                _logger.LogDebug("OnConnectedAsync {connectionId} on hub {hubName} (serverId: {serverId}) - UserIdentifier: {userIdentifier}",
+                    connection.ConnectionId, _hubName, _serverId, connection.UserIdentifier);
+
                 if (connection.User.Identity.IsAuthenticated)
                 {
                     var user = _clusterClientProvider.GetClient().GetUserGrain(_hubName, connection.UserIdentifier);
@@ -131,7 +134,8 @@ namespace SignalR.Orleans
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error has occurred 'OnConnectedAsync' while adding connection {connectionId} [hub: {hubName} (serverId: {serverId})]", connection?.ConnectionId, _hubName, _serverId);
+                _logger.LogError(ex, "An error has occurred 'OnConnectedAsync' while adding connection {connectionId} [hub: {hubName} (serverId: {serverId})] - UserIdentifier: {userIdentifier}",
+                    connection?.ConnectionId, _hubName, _serverId, connection?.UserIdentifier);
                 _connections.Remove(connection);
                 throw;
             }
