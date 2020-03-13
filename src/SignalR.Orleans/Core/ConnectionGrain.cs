@@ -68,7 +68,7 @@ namespace SignalR.Orleans.Core
         {
             if (!State.Connections.Add(connectionId))
                 return;
-            _logger.Info("Added connection '{connectionId}' for {hubName} ({groupId}). {connectionsCount} connection(s)",
+            _logger.Info("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
                 connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count);
 
             var clientDisconnectStream = GetClientDisconnectStream(connectionId);
@@ -79,7 +79,7 @@ namespace SignalR.Orleans.Core
         public virtual async Task Remove(string connectionId)
         {
             var shouldWriteState = State.Connections.Remove(connectionId);
-            _logger.Info("Removing connection '{connectionId}' for {hubName} ({groupId}). Remaining {connectionsCount} connection(s), was found: {isConnectionFound}",
+            _logger.Info("Removing connection '{connectionId}' on {hubName} ({groupId}). Remaining {connectionsCount} connection(s), was found: {isConnectionFound}",
                 connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count, shouldWriteState);
             _connectionStreamToUnsubscribe.Add(connectionId);
 
