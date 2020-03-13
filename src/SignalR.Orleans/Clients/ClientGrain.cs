@@ -61,15 +61,16 @@ namespace SignalR.Orleans.Clients
                 await _serverStream.OnNextAsync(new ClientMessage { ConnectionId = _keyData.Id, Payload = message.Value, HubName = _keyData.HubName });
                 return;
             }
-
-            _logger.LogInformation("Client not connected for connectionId {connectionId} and hub {hubName} ({targetMethod})", _keyData.Id, _keyData.HubName, message.Value.Target);
-
             _failAttempts++;
+
+            _logger.LogInformation("Client not connected for connectionId {connectionId} and hub {hubName} ({targetMethod}). FailedAttemptsCount: {failAttemptsCount}",
+                _keyData.Id, _keyData.HubName, message.Value.Target, _failAttempts);
+
             if (_failAttempts >= _maxFailAttempts)
             {
                 await OnDisconnect(ClientDisconnectReasons.AttemptsLimitReached);
-                _logger.LogWarning("Force disconnect client for connectionId {connectionId} and hub {hubName} ({targetMethod}) after exceeding attempts limit",
-                    _keyData.Id, _keyData.HubName, message.Value.Target);
+                _logger.LogWarning("Force disconnect client for connectionId {connectionId} and hub {hubName} ({targetMethod}) after exceeding attempts limit. FailedAttemptsCount: {failAttemptsCount}",
+                    _keyData.Id, _keyData.HubName, message.Value.Target, _failAttempts);
             }
         }
 

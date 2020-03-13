@@ -118,6 +118,8 @@ namespace SignalR.Orleans
 
             try
             {
+                _logger.LogInformation("Connected {connectionId} on hub {hubName} with userId {userId} (serverId: {serverId})",
+                    connection.ConnectionId, _hubName, connection.UserIdentifier, _serverId);
                 _connections.Add(connection);
 
                 var client = _clusterClientProvider.GetClient().GetClientGrain(_hubName, connection.ConnectionId);
@@ -145,8 +147,8 @@ namespace SignalR.Orleans
         {
             try
             {
-                _logger.LogDebug("Handle disconnection {connectionId} on hub {hubName} (serverId: {serverId})",
-                    connection.ConnectionId, _hubName, _serverId);
+                _logger.LogInformation("Disconnection {connectionId} on hub {hubName} with userId {userId} (serverId: {serverId})",
+                    connection.ConnectionId, _hubName, connection.UserIdentifier, _serverId);
                 var client = _clusterClientProvider.GetClient().GetClientGrain(_hubName, connection.ConnectionId);
                 await client.OnDisconnect(ClientDisconnectReasons.HubDisconnect);
             }
