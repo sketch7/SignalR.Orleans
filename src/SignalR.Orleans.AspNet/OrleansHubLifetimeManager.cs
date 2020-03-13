@@ -123,8 +123,8 @@ namespace SignalR.Orleans
                 var client = _clusterClientProvider.GetClient().GetClientGrain(_hubName, connection.ConnectionId);
                 await client.OnConnect(_serverId);
 
-                _logger.LogDebug("OnConnectedAsync {connectionId} on hub {hubName} (serverId: {serverId}) - UserIdentifier: {userIdentifier}",
-                    connection.ConnectionId, _hubName, _serverId, connection.UserIdentifier);
+                _logger.LogInformation("Connected {connectionId} on hub {hubName} with userId {userId} (serverId: {serverId})",
+                    connection.ConnectionId, _hubName, connection.UserIdentifier, _serverId);
 
                 if (connection.User.Identity.IsAuthenticated)
                 {
@@ -134,8 +134,8 @@ namespace SignalR.Orleans
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error has occurred 'OnConnectedAsync' while adding connection {connectionId} [hub: {hubName} (serverId: {serverId})] - UserIdentifier: {userIdentifier}",
-                    connection?.ConnectionId, _hubName, _serverId, connection?.UserIdentifier);
+                _logger.LogError(ex, "An error has occurred 'OnConnectedAsync' while adding connection {connectionId} on hub {hubName} with userId {userId} (serverId: {serverId})",
+                    connection?.ConnectionId, _hubName, connection?.UserIdentifier, _serverId);
                 _connections.Remove(connection);
                 throw;
             }
@@ -145,8 +145,8 @@ namespace SignalR.Orleans
         {
             try
             {
-                _logger.LogDebug("Handle disconnection {connectionId} on hub {hubName} (serverId: {serverId})",
-                    connection.ConnectionId, _hubName, _serverId);
+                _logger.LogInformation("Disconnection {connectionId} on hub {hubName} with userId {userId} (serverId: {serverId})",
+                    connection.ConnectionId, _hubName, connection.UserIdentifier, _serverId);
                 var client = _clusterClientProvider.GetClient().GetClientGrain(_hubName, connection.ConnectionId);
                 await client.OnDisconnect(ClientDisconnectReasons.HubDisconnect);
             }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Concurrency;
+using Orleans.Runtime;
 using Orleans.Streams;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace SignalR.Orleans.Core
         public override async Task OnActivateAsync()
         {
             KeyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
+            _logger.Info("Activate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
             _streamProvider = GetStreamProvider(Constants.STREAM_PROVIDER);
 
             _cleanupTimer = RegisterTimer(
@@ -57,6 +59,7 @@ namespace SignalR.Orleans.Core
 
         public override Task OnDeactivateAsync()
         {
+            _logger.Info("Deactivate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
             _cleanupTimer?.Dispose();
             return CleanupStreams();
         }
@@ -65,6 +68,8 @@ namespace SignalR.Orleans.Core
         {
             if (!State.Connections.Add(connectionId))
                 return;
+            _logger.Info("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
+                connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count);
 
             var clientDisconnectStream = GetClientDisconnectStream(connectionId);
             await clientDisconnectStream.SubscribeAsync(async (connId, _) => await Remove(connId));
@@ -74,6 +79,8 @@ namespace SignalR.Orleans.Core
         public virtual async Task Remove(string connectionId)
         {
             var shouldWriteState = State.Connections.Remove(connectionId);
+            _logger.Info("Removing connection '{connectionId}' on {hubName} ({groupId}). Remaining {connectionsCount} connection(s), was found: {isConnectionFound}",
+                connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count, shouldWriteState);
             _connectionStreamToUnsubscribe.Add(connectionId);
 
             if (State.Connections.Count == 0)
@@ -100,7 +107,7 @@ namespace SignalR.Orleans.Core
 
         protected Task SendAll(Immutable<InvocationMessage> message, IReadOnlyCollection<string> connections)
         {
-            _logger.LogDebug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
+            _logger.Debug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
                 KeyData.HubName, message.Value.Target, KeyData.Id, connections.Count);
 
             foreach (var connection in connections)
