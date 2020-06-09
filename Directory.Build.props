@@ -33,13 +33,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <!-- Shared Package Versions -->
   <PropertyGroup>
     <!-- vendors -->
-    <OrleansVersion>3.0.0</OrleansVersion>
+    <OrleansVersion>3.2.0</OrleansVersion>
     <OrleansStreamsUtilsVersion>8.0.0</OrleansStreamsUtilsVersion>
   </PropertyGroup>
 </Project>
