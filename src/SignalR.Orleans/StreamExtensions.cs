@@ -32,20 +32,19 @@ namespace SignalR.Orleans
         public static async Task ResumeAllSubscriptionHandlers<T>(this IAsyncStream<T> stream, Func<T, StreamSequenceToken, Task> onNextAsync)
         {
             var subscriptions = await stream.GetAllSubscriptionHandles();
-            var tasks = new List<Task>();
             if (subscriptions?.Count > 0)
-                tasks.AddRange(subscriptions.Select(x => x.ResumeAsync(onNextAsync)));
-
-            if (tasks.Count > 0)
+            {
+                var tasks = subscriptions.Select(x => x.ResumeAsync(onNextAsync));
                 await Task.WhenAll(tasks);
+            }
         }
 
         public static async Task UnsubscribeAllSubscriptionHandlers<T>(this IAsyncStream<T> stream)
         {
-            var serverDisconnectedStreamSubs = await stream.GetAllSubscriptionHandles();
-            if (serverDisconnectedStreamSubs?.Count > 0)
+            var subscriptions = await stream.GetAllSubscriptionHandles();
+            if (subscriptions?.Count > 0)
             {
-                var tasks = serverDisconnectedStreamSubs.Select(x => x.UnsubscribeAsync());
+                var tasks = subscriptions.Select(x => x.UnsubscribeAsync());
                 await Task.WhenAll(tasks);
             }
         }

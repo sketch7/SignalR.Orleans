@@ -7,7 +7,7 @@
 
 ### Bug Fixes
 
-- **client:** attempt to fix extention not installed in grain
+- **client:** attempt to fix extension not installed in grain
 
 ## [2.0.0-rc4](https://github.com/sketch7/SignalR.Orleans/compare/2.0.0-rc3...2.0.0-rc4) (2020-06-11)
 
