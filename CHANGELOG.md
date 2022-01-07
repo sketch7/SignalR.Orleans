@@ -6,7 +6,7 @@
 
 ### Features
 
-- **OrleansStreamsUtils:** Update OrleansStreamsUtils to v10.0.0 which consumes Orleans 3.5.1
+- **deps:** update `OrleansStreamsUtils` to v10.0.0 which consumes Orleans 3.5.1
 
 ## [3.1.0](https://github.com/sketch7/SignalR.Orleans/compare/3.0.0...3.1.0) (2021-12-02)
 
