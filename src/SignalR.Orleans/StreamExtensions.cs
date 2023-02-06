@@ -35,7 +35,7 @@ internal static class StreamReplicaExtensions
 		var ns = string.IsNullOrEmpty(replicaId)
 				? BuildReplicaStreamNameRandom(streamNamespace, replicas)
 				: BuildReplicaStreamName(streamNamespace, replicaId.ToPartitionIndex(replicas));
-		return streamProvider.GetStream<T>(streamId, ns);
+		return streamProvider.GetStream<T>(streamId.ToString(), ns);
 	}
 
 	public static async Task ResumeAllSubscriptionHandlers<T>(this IAsyncStream<T> stream, Func<T, StreamSequenceToken, Task> onNextAsync)
