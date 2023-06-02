@@ -7,10 +7,10 @@ on:
       - '*.x'
       - feature/*
 
-  pull_request:
-    branches:
-      - master
-      - '*.x'
+  # pull_request:
+  #   branches:
+  #     - master
+  #     - '*.x'
 
   workflow_dispatch:
     inputs:
