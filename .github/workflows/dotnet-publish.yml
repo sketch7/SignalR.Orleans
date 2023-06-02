@@ -1,4 +1,4 @@
-name: Build
+name: App Build
 
 on:
   push:
@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: App Build Job
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
