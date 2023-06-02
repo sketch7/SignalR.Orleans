@@ -22,6 +22,7 @@ jobs:
       dotnet-version: 6.0.x
 
   build_apd:
+    needs: build_app
     name: App Build Job 2
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
