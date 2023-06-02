@@ -6,9 +6,16 @@ on:
       - master
       - '*.x'
 
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish NuGet packages'
+        required: true
+        default: 'false'
+
 jobs:
   build:
-    name: .NET Build
+    name: Build
     uses: sketch7/workflows/.github/workflows/build-and-publish.yml@main
     with:
       dotnet-version: 6.0.x
