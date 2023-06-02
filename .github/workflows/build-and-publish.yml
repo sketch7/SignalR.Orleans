@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - '*.x'
+      - feature/*
 
   workflow_dispatch:
     inputs:
