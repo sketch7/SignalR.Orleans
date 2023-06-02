@@ -16,7 +16,7 @@ on:
 
 jobs:
   build_app:
-    name: App Build Job
+    name: App Build Jobx
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
