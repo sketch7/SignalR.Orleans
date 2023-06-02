@@ -17,6 +17,6 @@ on:
 jobs:
   build:
     name: Build
-    uses: sketch7/.github/.github/workflows/build-and-publish.yml@main
+    uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
