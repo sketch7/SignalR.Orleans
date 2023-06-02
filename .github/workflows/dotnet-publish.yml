@@ -7,12 +7,10 @@ on:
       - '*.x'
       - feature/*
 
-  # pull_request:
-  #   branches:
-  #     - master
-  #     - '*.x'
-
-  workflow_call:
+  pull_request:
+    branches:
+      - master
+      - '*.x'
 
   workflow_dispatch:
     inputs:
@@ -23,7 +21,7 @@ on:
 
 jobs:
   build_app:
-    name: App Build Jobx
+    name: App Build Jobz
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
