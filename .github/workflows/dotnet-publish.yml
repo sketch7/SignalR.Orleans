@@ -25,4 +25,4 @@ jobs:
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
-      publishable: ! ([ $BRANCH_NAME = "refs/heads/master" ] || [ $BRANCH_NAME = "refs/heads/vnext" ] || [[ "$BRANCH_NAME" =~ refs/heads/([0-9].*)\.x$ ]])
+      publishable: ! ([ $BRANCH_NAME = "refs/heads/master" ] || [ $BRANCH_NAME = "refs/heads/vnext" ] )
