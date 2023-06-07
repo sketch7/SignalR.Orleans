@@ -25,4 +25,4 @@ jobs:
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
-      # publishable: ${{ github.ref_name == 'develop' || github.ref_name == 'master' || endsWith(github.ref_name, '.x') || endsWith(github.ref_name, '-workflow') }}
+      publishable: ${{ github.ref_name == 'develop' || github.ref_name == 'master' || endsWith(github.ref_name, '.x') || endsWith(github.ref_name, '-workflow') }}
