@@ -26,4 +26,6 @@ if [ -n "$PACKAGE_VERSION_SUFFIX" ]; then
 	VERSION=$VERSION-$PACKAGE_VERSION_SUFFIX
 fi
 
+echo "VERSION=$VERSION" >> "$GIT_ENV"
+
 echo -e "\e[36m ---- version '$VERSION' ---- \e[39m"
