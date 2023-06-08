@@ -9,11 +9,14 @@ BRANCH=$GITHUB_BASE_REF
 # BUILD_NUM=$CIRCLE_BUILD_NUM
 BUILD_NUM=$GITHUB_RUN_NUMBER
 
+echo "BRANCH: $BRANCH, BUILD_NUM: $BUILD_NUM"
+
 if [ -z "$PACKAGE_VERSION_SUFFIX" ] && [ -z "$CI" ]; then
 	PACKAGE_VERSION_SUFFIX=dev
 fi
 
-if [ $BRANCH = "master" ] ; then
+if [ $BRANCH = "feature/reusable-workflow" ] ; then
+# if [ $BRANCH = "master" ] ; then
 	PACKAGE_VERSION_SUFFIX=dev$BUILD_NUM
 elif [ -n $BRANCH ]; then
 	echo BRANCH EMPTY
