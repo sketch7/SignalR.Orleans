@@ -18,7 +18,7 @@ echo -e "\e[36m ---- Publish ---- \e[39m"
 
 echo -e "\e[36m ---- Publishing '$VERSION' ---- \e[39m"
 
-# todo: testing only uncomment
+SKETCH7_NUGET_API_KEY=oy2e4uwqahfgbp5zls7qjjnospsta6qenpr6wo3oz44t7u
 find *.nupkg | xargs -i dotnet nuget push {} -k $SKETCH7_NUGET_API_KEY -s https://api.nuget.org/v3/index.json
 
 echo -e "\e[36m ---- git tag '$VERSION' ---- \e[39m"
