@@ -21,8 +21,8 @@ on:
 
 jobs:
   build_app:
-    name: App Build Job x8
+    name: App Build Job x9
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
-      publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow-setup"]'), github.ref_name) || endsWith(github.ref_name, '.x') || endsWith(github.ref_name, '-workflow') }}
+      publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }} # || endsWith(github.ref_name, '-workflow')
