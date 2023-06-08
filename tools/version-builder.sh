@@ -10,6 +10,8 @@ fi
 
 if [ $CIRCLE_BRANCH = "master" ] ; then
 	PACKAGE_VERSION_SUFFIX=dev$CIRCLE_BUILD_NUM
+elif [ -n $CIRCLE_BRANCH ]; then
+	echo EMPTY
 fi
 
 if [ -n "$PACKAGE_VERSION_SUFFIX" ]; then
