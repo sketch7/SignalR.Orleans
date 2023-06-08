@@ -3,15 +3,20 @@
 PACKAGE_VERSION=$(node -p "require('./package.json').version")
 PACKAGE_VERSION_SUFFIX=$(node -p "require('./package.json').versionSuffix")
 VERSION=$PACKAGE_VERSION
+# BRANCH=$CIRCLE_BRANCH
+BRANCH=$GITHUB_BASE_REF
+
+# BUILD_NUM=$CIRCLE_BUILD_NUM
+BUILD_NUM=$GITHUB_RUN_NUMBER
 
 if [ -z "$PACKAGE_VERSION_SUFFIX" ] && [ -z "$CI" ]; then
 	PACKAGE_VERSION_SUFFIX=dev
 fi
 
-if [ $CIRCLE_BRANCH = "master" ] ; then
-	PACKAGE_VERSION_SUFFIX=dev$CIRCLE_BUILD_NUM
-elif [ -n $CIRCLE_BRANCH ]; then
-	echo EMPTY
+if [ $BRANCH = "master" ] ; then
+	PACKAGE_VERSION_SUFFIX=dev$BUILD_NUM
+elif [ -n $BRANCH ]; then
+	echo BRANCH EMPTY
 fi
 
 if [ -n "$PACKAGE_VERSION_SUFFIX" ]; then
