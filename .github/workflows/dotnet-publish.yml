@@ -13,19 +13,12 @@ on:
   #     - master
   #     - '*.x'
 
-  # workflow_dispatch:
-  #   inputs:
-  #     publish:
-  #       description: 'Publish NuGet packages'
-  #       required: true
-  #       default: 'false'
-env:
-  NUGET_AUTH_TOKEN: ${{ secrets.NUGET_KEY }}
-
 jobs:
   build_app:
-    name: App Build Job x30
+    name: App Build Job x31
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
       publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }}
+    secrets:
+      nuget-auth-token: ${{ secrets.NUGET_KEY }}
