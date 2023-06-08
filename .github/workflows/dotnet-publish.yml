@@ -19,6 +19,8 @@ on:
   #       description: 'Publish NuGet packages'
   #       required: true
   #       default: 'false'
+env:
+  NUGET_AUTH_TOKEN: ${{ secrets.NUGET_KEY }}
 
 jobs:
   build_app:
