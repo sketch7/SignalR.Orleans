@@ -22,7 +22,7 @@ on:
 
 jobs:
   build_app:
-    name: App Build Job x16
+    name: App Build Job x17
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
