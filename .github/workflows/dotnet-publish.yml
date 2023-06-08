@@ -1,0 +1,29 @@
+name: App Build
+
+on:
+  push:
+    branches:
+      - master
+      - '*.x'
+      - feature/* # todo: comment
+
+  # todo: uncomment
+  # pull_request:
+  #   branches:
+  #     - master
+  #     - '*.x'
+
+  # workflow_dispatch:
+  #   inputs:
+  #     publish:
+  #       description: 'Publish NuGet packages'
+  #       required: true
+  #       default: 'false'
+
+jobs:
+  build_app:
+    name: App Build Job x15
+    uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
+    with:
+      dotnet-version: 6.0.x
+      publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }}
