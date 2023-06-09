@@ -7,16 +7,15 @@ on:
       - '*.x'
       - feature/* # todo: comment
 
-  # todo: uncomment
-  # pull_request:
-  #   branches:
-  #     - master
-  #     - '*.x'
+  pull_request:
+    branches:
+      - master
+      - '*.x'
 
 jobs:
   build:
     name: Build
-    uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
+    uses: sketch7/.github/.github/workflows/dotnet-package.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
       publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }}
