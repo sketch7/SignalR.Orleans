@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - '*.x'
-      - feature/* # todo: comment
+      # - feature/*
 
   pull_request:
     branches:
