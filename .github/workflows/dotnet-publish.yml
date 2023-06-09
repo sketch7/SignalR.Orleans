@@ -1,4 +1,4 @@
-name: App Build
+name: Package build/publish
 
 on:
   push:
@@ -14,17 +14,13 @@ on:
   #     - '*.x'
 
 jobs:
-  build_app:
-    name: App Build Job x34
+  build:
+    name: Build
     uses: sketch7/.github/.github/workflows/dotnet-publish.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
       publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/reusable-workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }}
     secrets:
       nuget-auth-token: ${{ secrets.NUGET_KEY }}
-  ver:
-    runs-on: ubuntu-latest
-    needs: build_app
-    steps:
-      - run: echo ${{ needs.build_app.outputs.version }}
+
 
