@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: dotnet package x1
+    name: dotnet package
     uses: sketch7/.github/.github/workflows/dotnet-package.yml@feature/reusable-workflow-setup
     with:
       dotnet-version: 6.0.x
