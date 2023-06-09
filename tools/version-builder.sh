@@ -15,9 +15,7 @@ if [ -z "$PACKAGE_VERSION_SUFFIX" ] && [ -z "$CI" ]; then
 	PACKAGE_VERSION_SUFFIX=dev
 fi
 
-# todo: testing only - change to master
-if [ $BRANCH = "feature/reusable-workflow" ] ; then
-# if [ $BRANCH = "master" ] ; then
+if [ $CIRCLE_BRANCH = "master" ] ; then
 	PACKAGE_VERSION_SUFFIX=dev$BUILD_NUM
 elif [ -n $BRANCH ]; then
 	echo BRANCH EMPTY
@@ -26,7 +24,5 @@ fi
 if [ -n "$PACKAGE_VERSION_SUFFIX" ]; then
 	VERSION=$VERSION-$PACKAGE_VERSION_SUFFIX
 fi
-
-echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
 echo -e "\e[36m ---- version '$VERSION' ---- \e[39m"

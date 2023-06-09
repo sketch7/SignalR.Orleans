@@ -10,11 +10,10 @@ err(){
 }
 
 echo -e "\e[36m ---- Publish ---- \e[39m"
-# todo: testing only uncomment
-# if [ "$SKETCH7_NUGET_API_KEY" == "" ]; then
-# 	err "'SKETCH7_NUGET_API_KEY' environment variable not defined."
-# 	exit 1
-# fi
+if [ "$SKETCH7_NUGET_API_KEY" == "" ]; then
+	err "'SKETCH7_NUGET_API_KEY' environment variable not defined."
+	exit 1
+fi
 
 echo -e "\e[36m ---- Publishing '$VERSION' ---- \e[39m"
 
