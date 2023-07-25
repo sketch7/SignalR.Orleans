@@ -73,7 +73,11 @@ internal class ClientGrain : Grain<ClientState>, IClientGrain
 		}
 	}
 
-	public Task SendOneWay(Immutable<InvocationMessage> message) => throw new NotImplementedException(); // todo: matti
+	public Task SendOneWay(Immutable<InvocationMessage> message)
+	{
+		Send(message).Ignore();
+		return Task.CompletedTask;
+	}
 
 	public async Task OnConnect(Guid serverId)
 	{

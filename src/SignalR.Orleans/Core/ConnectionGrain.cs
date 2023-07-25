@@ -81,7 +81,11 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	public virtual Task Send(Immutable<InvocationMessage> message)
 		=> SendAll(message, State.Connections);
 
-	public Task SendOneWay(Immutable<InvocationMessage> message) => throw new NotImplementedException(); // todo: matti
+	public Task SendOneWay(Immutable<InvocationMessage> message)
+	{
+		Send(message).Ignore();
+		return Task.CompletedTask;
+	}
 
 	public Task SendExcept(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds)
 	{
