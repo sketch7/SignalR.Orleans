@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR.Protocol;
-using Orleans.Runtime;
 
 namespace SignalR.Orleans.Core;
 
@@ -19,11 +18,11 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 		_logger = logger;
 	}
 
-	public override async Task OnActivateAsync()
+	public override async Task OnActivateAsync(CancellationToken cancellationToken)
 	{
 		KeyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
-		_logger.Info("Activate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
-		_streamProvider = GetStreamProvider(Constants.STREAM_PROVIDER);
+		_logger.LogInformation("Activate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
+		_streamProvider = this.GetStreamProvider(Constants.STREAM_PROVIDER);
 
 		_cleanupTimer = RegisterTimer(
 			_ => CleanupStreams(),
@@ -43,9 +42,9 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 		}
 	}
 
-	public override Task OnDeactivateAsync()
+	public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
 	{
-		_logger.Info("Deactivate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
+		_logger.LogInformation("Deactivate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
 		_cleanupTimer?.Dispose();
 		return CleanupStreams();
 	}
@@ -54,7 +53,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	{
 		if (!State.Connections.Add(connectionId))
 			return;
-		_logger.Info("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
+		_logger.LogInformation("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
 			connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count);
 
 		var clientDisconnectStream = GetClientDisconnectStream(connectionId);
@@ -65,7 +64,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	public virtual async Task Remove(string connectionId)
 	{
 		var shouldWriteState = State.Connections.Remove(connectionId);
-		_logger.Info("Removing connection '{connectionId}' on {hubName} ({groupId}). Remaining {connectionsCount} connection(s), was found: {isConnectionFound}",
+		_logger.LogInformation("Removing connection '{connectionId}' on {hubName} ({groupId}). Remaining {connectionsCount} connection(s), was found: {isConnectionFound}",
 			connectionId, KeyData.HubName, KeyData.Id, State.Connections.Count, shouldWriteState);
 		_connectionStreamToUnsubscribe.Add(connectionId);
 
@@ -82,6 +81,8 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	public virtual Task Send(Immutable<InvocationMessage> message)
 		=> SendAll(message, State.Connections);
 
+	public Task SendOneWay(Immutable<InvocationMessage> message) => throw new NotImplementedException(); // todo: matti
+
 	public Task SendExcept(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds)
 	{
 		var message = new Immutable<InvocationMessage>(new InvocationMessage(methodName, args));
@@ -93,14 +94,11 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 
 	protected Task SendAll(Immutable<InvocationMessage> message, IReadOnlyCollection<string> connections)
 	{
-		_logger.Debug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
+		_logger.LogDebug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
 			KeyData.HubName, message.Value.Target, KeyData.Id, connections.Count);
 
-		foreach (var connection in connections)
-		{
-			GrainFactory.GetClientGrain(KeyData.HubName, connection)
-				.InvokeOneWay(x => x.Send(message));
-		}
+		foreach (var connection in connections) 
+			GrainFactory.GetClientGrain(KeyData.HubName, connection).SendOneWay(message);
 
 		return Task.CompletedTask;
 	}
@@ -118,7 +116,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	}
 
 	private IAsyncStream<string> GetClientDisconnectStream(string connectionId)
-		=> _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
+		=> _streamProvider.GetStream<string>(connectionId, Constants.CLIENT_DISCONNECT_STREAM_ID);
 }
 
 internal abstract class ConnectionState
