@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="$(OrleansVersion)" />
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="3.7.1" />
   </ItemGroup>
 
   <!-- src libraries -->
