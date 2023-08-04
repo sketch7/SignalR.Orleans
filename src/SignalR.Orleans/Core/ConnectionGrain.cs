@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Protocol;
+using Orleans.Runtime;
 
 namespace SignalR.Orleans.Core;
 
@@ -120,7 +121,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	}
 
 	private IAsyncStream<string> GetClientDisconnectStream(string connectionId)
-		=> _streamProvider.GetStream<string>(connectionId, Constants.CLIENT_DISCONNECT_STREAM_ID);
+		=> _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
 }
 
 internal abstract class ConnectionState

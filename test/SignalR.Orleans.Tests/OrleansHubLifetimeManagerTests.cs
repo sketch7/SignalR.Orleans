@@ -239,7 +239,7 @@ public class OrleansHubLifetimeManagerTests : IClassFixture<OrleansFixture>
 			await manager.SendGroupAsync(groupName, "Hello", new object[] { "World" });
 			await manager.SendGroupAsync(groupName, "Hello", new object[] { "World" });
 
-			await Task.Delay(1);
+			await Task.Delay(200);
 			connectionsCount = await grain.Count();
 			Assert.Equal(1, connectionsCount);
 		}
@@ -392,6 +392,7 @@ public class OrleansHubLifetimeManagerTests : IClassFixture<OrleansFixture>
 			await manager.OnDisconnectedAsync(connection);
 
 			var grain = _fixture.Client.GetGroupGrain("MyHub", "dre");
+			await Task.Delay(200);
 			var result = await grain.Count();
 			Assert.Equal(0, result);
 		}

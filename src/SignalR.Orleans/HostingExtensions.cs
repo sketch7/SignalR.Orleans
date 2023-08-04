@@ -14,7 +14,7 @@ public static class SiloBuilderExtensions
 		configure?.Invoke(cfg);
 
 		cfg.ConfigureBuilder?.Invoke(builder, new HostBuilderConfig());
-		
+
 		try { builder.AddMemoryGrainStorage(Constants.STORAGE_PROVIDER); }
 		catch { /* Grain storage provider was already added. Do nothing. */ }
 
