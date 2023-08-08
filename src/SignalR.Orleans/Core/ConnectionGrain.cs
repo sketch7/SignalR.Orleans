@@ -102,9 +102,6 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 		_logger.Debug("Sending message to {hubName}.{targetMethod} on group {groupId} to {connectionsCount} connection(s)",
 			KeyData.HubName, message.Value.Target, KeyData.Id, connections.Count);
 
-		// trigger indexPatternGroupGrain here? (but for group only and when not pattern)
-		// GrainFactory.GetIndexPatternGroupGrain(KeyData.HubName).InvokeOneWay(x => x.Send(KeyData.Id, message))
-
 		foreach (var connection in connections)
 		{
 			GrainFactory.GetClientGrain(KeyData.HubName, connection)
