@@ -69,7 +69,7 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IDispos
 		_streamProvider = _clusterClient.GetStreamProvider(Constants.STREAM_PROVIDER);
 		_serverStreamsReplicaContainer = new StreamReplicaContainer<ClientMessage>(_streamProvider, _serverId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
 
-		_allStream = _streamProvider.GetStream<AllMessage>(Constants.ALL_STREAM_ID, Utils.BuildStreamHubName(_hubName));
+		_allStream = _streamProvider.GetStream<AllMessage>(Utils.BuildStreamHubName(_hubName), Constants.ALL_STREAM_ID);
 		_timer = new Timer(_ => Task.Run(HeartbeatCheck), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Constants.HEARTBEAT_PULSE_IN_MINUTES));
 
 		var subscribeTasks = new List<Task>

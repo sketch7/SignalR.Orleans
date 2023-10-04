@@ -37,21 +37,6 @@ public class SignalrOrleansSiloConfigBuilder : SignalrOrleansConfigBaseBuilder
 	}
 }
 
-public class SignalrOrleansSiloHostConfigBuilder : SignalrOrleansConfigBaseBuilder
-{
-	internal Action<ISiloBuilder, HostBuilderConfig> ConfigureBuilder { get; set; }
-
-	/// <summary>
-	/// Configure builder, such as providers.
-	/// </summary>
-	/// <param name="configure">Configure action. This may be called multiple times.</param>
-	public SignalrOrleansSiloHostConfigBuilder Configure(Action<ISiloBuilder, HostBuilderConfig> configure)
-	{
-		ConfigureBuilder += configure;
-		return this;
-	}
-}
-
 public class SignalrClientConfig
 {
 	public bool UseFireAndForgetDelivery { get; set; }
