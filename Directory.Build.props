@@ -18,7 +18,6 @@
     <IncludeSymbols>true</IncludeSymbols>
     <IncludeSource>true</IncludeSource>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- <Nullable>enable</Nullable> -->
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
@@ -40,8 +39,14 @@
 
   <!-- Shared Package Versions -->
   <PropertyGroup>
-    <!-- vendors -->
-    <OrleansVersion>7.2.3</OrleansVersion>
-    <OrleansStreamsUtilsVersion>13.1.3</OrleansStreamsUtilsVersion>
+    <OrleansVersion>7.2.4</OrleansVersion>
   </PropertyGroup>
+
+  <!--<PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <OrleansVersion>7.2.4</OrleansVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <OrleansVersion>8.0.0</OrleansVersion>
+  </PropertyGroup>-->
 </Project>

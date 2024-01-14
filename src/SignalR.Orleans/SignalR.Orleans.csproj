@@ -4,6 +4,11 @@
     <PackageId>Sketch7.SignalR.Orleans</PackageId>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <Compile Remove="KeyedServiceExtensions.cs" />
+    <Content Include="KeyedServiceExtensions.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

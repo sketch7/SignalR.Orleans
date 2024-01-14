@@ -8,6 +8,12 @@ namespace Orleans.Hosting;
 
 public static class SiloBuilderExtensions
 {
+	/// <summary>
+	/// Configures the Silo to use SignalR.
+	/// </summary>
+	/// <param name="builder"></param>
+	/// <param name="configure"></param>
+	/// <returns></returns>
 	public static ISiloBuilder UseSignalR(this ISiloBuilder builder, Action<SignalrOrleansSiloConfigBuilder> configure = null)
 	{
 		var cfg = new SignalrOrleansSiloConfigBuilder();
@@ -19,13 +25,11 @@ public static class SiloBuilderExtensions
 
 		builder.ConfigureServices(services => services.AddSingleton<IConfigurationValidator, SignalRConfigurationValidator>());
 
-		return builder
-			.AddMemoryStreams(Constants.STREAM_PROVIDER)
-			;
+		return builder.AddMemoryStreams(Constants.STREAM_PROVIDER);
 	}
 }
 
-internal class SignalRConfigurationValidator : IConfigurationValidator
+internal sealed class SignalRConfigurationValidator : IConfigurationValidator
 {
 	private readonly IServiceProvider _sp;
 	private readonly ILogger _logger;
@@ -39,15 +43,18 @@ internal class SignalRConfigurationValidator : IConfigurationValidator
 	public void ValidateConfiguration()
 	{
 		_logger.LogInformation("Checking if a PubSub storage provider was registered...");
-
+#if NET7_0
 		var pubSubProvider = _sp.GetServiceByName<IGrainStorage>(Constants.PUBSUB_PROVIDER);
-		if (pubSubProvider == null)
+#elif NET8_0_OR_GREATER
+		var pubSubProvider = Sketch7.KeyedServiceExtensions.GetServiceByName<IGrainStorage>(_sp, Constants.PUBSUB_PROVIDER);
+#endif
+		if (pubSubProvider is null)
 		{
-			var err = "No PubSub storage provider was registered. You need to register one. To use the default/in-memory provider, call 'siloBuilder.AddMemoryGrainStorage(\"PubSubStore\")' when building your Silo.";
+			const string err = "No PubSub storage provider was registered. You need to register one. To use the default/in-memory provider, call 'siloBuilder.AddMemoryGrainStorage(\"PubSubStore\")' when building your Silo.";
 			_logger.LogError(err);
 			throw new InvalidOperationException(err);
 		}
 
-		_logger.LogInformation($"Found the PubSub storage provider of type '{pubSubProvider.GetType().FullName}'.");
+		_logger.LogInformation("Found the PubSub storage provider of type '{TypeName}'.", pubSubProvider.GetType().FullName);
 	}
 }
