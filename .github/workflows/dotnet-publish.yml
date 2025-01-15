@@ -19,7 +19,8 @@ on:
 jobs:
   package:
     name: Package
-    uses: sketch7/.github/.github/workflows/dotnet-package.yml@dotnet-libs-v1
+    # uses: sketch7/.github/.github/workflows/dotnet-package.yml@dotnet-libs-v1
+    uses: sketch7/.github/.github/workflows/dotnet-package.yml@feature/dotnet-cache-pkgs-props
     with:
       dotnet-version: 8.0.x
       publishable: ${{ contains(fromJSON('["develop", "master", "workflow", "feature/workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x')  }}
