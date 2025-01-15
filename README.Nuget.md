@@ -17,13 +17,14 @@
 
 Installation is performed via [NuGet](https://www.nuget.org/packages/Sketch7.SignalR.Orleans/)
 
-## Netcore support
-- Use 1.x for netcore2
-- Use 2.x for netcore3
-- Use 3.x for netcore5
-- Use 4.x for netcore6
-- Use 5.x for netcore7
-- Use 6.x for netcore8
+## Netcore support & Orleans version
+- Use 1.x for netcore2 / Orleans 2
+- Use 2.x for netcore3 / Orleans 3.2.0
+- Use 3.x for netcore5 / Orleans 3.5.1
+- Use 4.x for netcore6 / Orleans 3.6.0
+- Use 5.x for netcore7 / Orleans 7.2.4
+- Use 6.x for netcore8 / Orleans 8.0.0
+- Use 7.x for netcore8 / Orleans 9.0.1
 - 
 From Package Manager:
 
