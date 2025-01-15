@@ -10,3 +10,4 @@
     "test": "find test/**/*.csproj | xargs -i dotnet test {} --no-build -c Release --filter Category!=e2e"
   }
 }
+
