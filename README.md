@@ -32,7 +32,7 @@ Installation is performed via [NuGet](https://www.nuget.org/packages/Sketch7.Sig
 ## Additional dotnet & Orleans support
 
 | Version       | .NET     | Orleans  |
-| 9.0.0-dev.179 | net8     | 9.0.1    |
+| 9.0.0-dev.182 | net8     | 9.0.1    |
 
 
 ### From Package Manager:
