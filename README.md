@@ -35,17 +35,17 @@ Installation is performed via [NuGet](https://www.nuget.org/packages/Sketch7.Sig
 | 9.0.0-dev.179 | net8     | 9.0.1    |
 
 
-From Package Manager:
+### From Package Manager:
 
 > PS> Install-Package Sketch7.SignalR.Orleans
 > PS> Install-Package Sketch7.SignalR.Orleans.AspNet
 
-.Net CLI:
+### .Net CLI:
 
 > \# dotnet add package Sketch7.SignalR.Orleans
 > \# dotnet add package Sketch7.SignalR.Orleans.AspNet
 
-Paket:
+### Paket:
 
 > \# paket add Sketch7.SignalR.Orleans
 > \# paket add Sketch7.SignalR.Orleans.AspNet
