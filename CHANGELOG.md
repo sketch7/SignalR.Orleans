@@ -7,7 +7,7 @@
 
 ### Features
 
-- **deps:** update to Orleans 9
+- **deps:** update to .NET9 and Orleans 9
 
 ## [6.0.1](https://github.com/sketch7/SignalR.Orleans/compare/6.0.0...6.0.1) (2025-01-20)
 
