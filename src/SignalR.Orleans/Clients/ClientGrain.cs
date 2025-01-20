@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR.Protocol;
+using Orleans.Runtime;
 using SignalR.Orleans.Core;
 
 namespace SignalR.Orleans.Clients;
