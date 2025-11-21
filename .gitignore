@@ -5,7 +5,6 @@
 *.suo
 *.user
 *.userosscache
-*.sln.docstates
 
 # mac
 .DS_Store
@@ -259,7 +258,7 @@ paket-files/
 
 # JetBrains Rider
 .idea/
-*.sln.iml
+**/global.json
 
 # CodeRush
 .cr/
@@ -267,6 +266,3 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-
-# global.json (used by Rider)
-**/global.json
