@@ -3,7 +3,7 @@
 [_vNext_](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0...1.1.0) (2024-X-X)
 
 
-## [8.0.0](https://github.com/sketch7/SignalR.Orleans/compare/7.0.0...8.0.0) (2025-11-18)
+## [8.0.0](https://github.com/sketch7/SignalR.Orleans/compare/7.0.0...8.0.0) (2025-11-21)
 
 ### Features
 
