@@ -1,4 +1,4 @@
-﻿namespace SignalR.Orleans.Core;
+﻿﻿namespace SignalR.Orleans.Core;
 
 public interface IServerDirectoryGrain : IGrainWithIntegerKey
 {
@@ -19,7 +19,7 @@ public class ServerDirectoryGrain : Grain<ServerDirectoryState>, IServerDirector
 	private IStreamProvider _streamProvider;
 
 	private readonly ILogger<ServerDirectoryGrain> _logger;
-	private IDisposable _cleanupTimer;
+	private IGrainTimer _cleanupTimer;
 
 	public ServerDirectoryGrain(ILogger<ServerDirectoryGrain> logger)
 	{
@@ -33,11 +33,14 @@ public class ServerDirectoryGrain : Grain<ServerDirectoryState>, IServerDirector
 		_logger.LogInformation("Available servers {serverIds}",
 			string.Join(", ", State.Servers?.Count > 0 ? string.Join(", ", State.Servers) : "empty"));
 
-		_cleanupTimer = RegisterTimer(
-			ValidateAndCleanUp,
+		_cleanupTimer = this.RegisterGrainTimer(
+			async _ => await ValidateAndCleanUp(State),
 			State,
-			TimeSpan.FromSeconds(15),
-			TimeSpan.FromMinutes(Constants.SERVERDIRECTORY_CLEANUP_IN_MINUTES));
+			new GrainTimerCreationOptions
+			{
+				DueTime = TimeSpan.FromSeconds(15),
+				Period = TimeSpan.FromMinutes(Constants.SERVERDIRECTORY_CLEANUP_IN_MINUTES)
+			});
 
 		return Task.CompletedTask;
 	}

@@ -2,6 +2,15 @@
 
 [_vNext_](https://github.com/sketch7/SignalR.Orleans/compare/1.0.0...1.1.0) (2024-X-X)
 
+## [8.0.1](https://github.com/sketch7/SignalR.Orleans/compare/8.0.0...8.0.1) (2025-11-27)
+
+### Features
+
+- **orleans:** update obsolete code
+
+### Bug Fixes
+
+- **orleans:** ConnectionGrain state null handling on Add
 
 ## [8.0.0](https://github.com/sketch7/SignalR.Orleans/compare/7.0.0...8.0.0) (2025-11-21)
 

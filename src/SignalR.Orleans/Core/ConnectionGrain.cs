@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR.Protocol;
-using Orleans.Runtime;
 
 namespace SignalR.Orleans.Core;
 
@@ -14,11 +13,11 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 {
 	private readonly ILogger _logger;
 	private IStreamProvider _streamProvider;
-	private readonly HashSet<string> _connectionStreamToUnsubscribe = new();
+	private readonly HashSet<string> _connectionStreamToUnsubscribe = [];
 	private readonly TimeSpan _cleanupPeriod = TimeSpan.Parse(Constants.CONNECTION_STREAM_CLEANUP);
 
 	protected ConnectionGrainKey KeyData;
-	private IDisposable _cleanupTimer;
+	private IGrainTimer _cleanupTimer;
 
 	internal ConnectionGrain(ILogger logger)
 	{
@@ -31,11 +30,14 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 		_logger.LogInformation("Activate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
 		_streamProvider = this.GetStreamProvider(Constants.STREAM_PROVIDER);
 
-		_cleanupTimer = RegisterTimer(
-			_ => CleanupStreams(),
+		_cleanupTimer = this.RegisterGrainTimer(
+			async _ => await CleanupStreams(),
 			State,
-			_cleanupPeriod,
-			_cleanupPeriod);
+			new GrainTimerCreationOptions
+			{
+				DueTime = _cleanupPeriod,
+				Period = _cleanupPeriod
+			});
 
 		if (State.Connections.Count == 0)
 		{
@@ -58,6 +60,12 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 
 	public virtual async Task Add(string connectionId)
 	{
+		if (State?.Connections is null)
+		{
+			_logger.LogInformation("ConnectionId: {connectionId} - State: {state} found null, initializing - groupId: {groupId}", connectionId, State, KeyData.Id);
+			State = new();
+		}
+
 		if (!State.Connections.Add(connectionId))
 			return;
 		_logger.LogInformation("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
@@ -134,5 +142,5 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 internal abstract class ConnectionState
 {
 	[Id(0)]
-	public HashSet<string> Connections { get; set; } = new HashSet<string>();
+	public HashSet<string> Connections { get; set; } = [];
 }
