@@ -60,6 +60,12 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 
 	public virtual async Task Add(string connectionId)
 	{
+		if (State?.Connections is null)
+		{
+			_logger.LogInformation("ConnectionId: {connectionId} - State: {state} found null, initializing - groupId: {groupId}", connectionId, State, KeyData.Id);
+			State = new();
+		}
+
 		if (!State.Connections.Add(connectionId))
 			return;
 		_logger.LogInformation("Added connection '{connectionId}' on {hubName} ({groupId}). {connectionsCount} connection(s)",
