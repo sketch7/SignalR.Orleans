@@ -72,7 +72,7 @@ public class ServerDirectoryGrain : Grain<ServerDirectoryState>, IServerDirector
 		var expiredServers = State.Servers.Where(server => server.Value < DateTime.UtcNow.AddMinutes(-Constants.SERVERDIRECTORY_CLEANUP_IN_MINUTES)).ToList();
 		foreach (var server in expiredServers)
 		{
-			var serverDisconnectedStream = _streamProvider.GetStream<Guid>(Constants.SERVER_DISCONNECTED, server.Key);
+			var serverDisconnectedStream = _streamProvider.GetStream<Guid>(StreamId.Create(Constants.SERVER_DISCONNECTED, server.Key));
 
 			_logger.LogWarning("Removing server {serverId} due to inactivity {lastUpdatedDate}", server.Key, server.Value);
 			await serverDisconnectedStream.OnNextAsync(server.Key);

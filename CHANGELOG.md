@@ -6,7 +6,8 @@
 
 ### Features
 
-- **orleans:** update obsolete code
+- **orleans:** update obsolete code from `RegisterTimer` to `RegisterGrainTimer`
+- **orleans:** update All streams to use `StreamId.Create(namespace, key)`
 
 ### Bug Fixes
 

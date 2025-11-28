@@ -99,7 +99,7 @@ internal class ClientGrain : Grain<ClientState>, IClientGrain
 
 		if (_keyData.Id != null)
 		{
-			var clientDisconnectStream = _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, _keyData.Id);
+			var clientDisconnectStream = _streamProvider.GetStream<string>(StreamId.Create(Constants.CLIENT_DISCONNECT_STREAM_ID, _keyData.Id));
 			await clientDisconnectStream.OnNextAsync(_keyData.Id);
 		}
 
