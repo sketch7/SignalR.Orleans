@@ -135,7 +135,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 	}
 
 	private IAsyncStream<string> GetClientDisconnectStream(string connectionId)
-		=> _streamProvider.GetStream<string>(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId);
+		=> _streamProvider.GetStream<string>(StreamId.Create(Constants.CLIENT_DISCONNECT_STREAM_ID, connectionId));
 }
 
 [GenerateSerializer]
