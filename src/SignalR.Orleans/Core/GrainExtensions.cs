@@ -9,48 +9,53 @@ namespace Orleans;
 
 public static class GrainSignalRExtensions
 {
-	/// <summary>
-	/// Invokes a method on the hub.
-	/// </summary>
 	/// <param name="grain"></param>
-	/// <param name="methodName">Target method name to invoke.</param>
-	/// <param name="args">Arguments to pass to the target method.</param>
-	public static Task Send(this IHubMessageInvoker grain, string methodName, params object[] args)
+	extension(IHubMessageInvoker grain)
 	{
-		var invocationMessage = new InvocationMessage(methodName, args).AsImmutable();
-		return grain.Send(invocationMessage);
-	}
+		/// <summary>
+		/// Invokes a method on the hub.
+		/// </summary>
+		/// <param name="methodName">Target method name to invoke.</param>
+		/// <param name="args">Arguments to pass to the target method.</param>
+		public Task Send(string methodName, params object[] args)
+		{
+			var invocationMessage = new InvocationMessage(methodName, args).AsImmutable();
+			return grain.Send(invocationMessage);
+		}
 
-	/// <summary>
-	/// Invokes a method on the hub (one way).
-	/// </summary>
-	/// <param name="grain"></param>
-	/// <param name="methodName">Target method name to invoke.</param>
-	/// <param name="args">Arguments to pass to the target method.</param>
-	public static void SendOneWay(this IHubMessageInvoker grain, string methodName, params object[] args)
-	{
-		var invocationMessage = new InvocationMessage(methodName, args).AsImmutable();
-		grain.SendOneWay(invocationMessage);
+		/// <summary>
+		/// Invokes a method on the hub (one way).
+		/// </summary>
+		/// <param name="methodName">Target method name to invoke.</param>
+		/// <param name="args">Arguments to pass to the target method.</param>
+		public void SendOneWay(string methodName, params object[] args)
+		{
+			var invocationMessage = new InvocationMessage(methodName, args).AsImmutable();
+			grain.SendOneWay(invocationMessage);
+		}
 	}
 }
 
 public static class GrainFactoryExtensions
 {
-	public static HubContext GetHub(this IGrainFactory grainFactory, string hubName)
-		=> new(grainFactory, hubName);
+	extension(IGrainFactory grainFactory)
+	{
+		public HubContext GetHub(string hubName)
+			=> new(grainFactory, hubName);
 
-	public static HubContext<THub> GetHub<THub>(this IGrainFactory grainFactory)
-		=> new(grainFactory);
+		public HubContext<THub> GetHub<THub>()
+			=> new(grainFactory);
 
-	internal static IClientGrain GetClientGrain(this IGrainFactory factory, string hubName, string connectionId)
-		=> factory.GetGrain<IClientGrain>(ConnectionGrainKey.Build(hubName, connectionId));
+		internal IClientGrain GetClientGrain(string hubName, string connectionId)
+			=> grainFactory.GetGrain<IClientGrain>(ConnectionGrainKey.Build(hubName, connectionId));
 
-	internal static IGroupGrain GetGroupGrain(this IGrainFactory factory, string hubName, string groupName)
-		=> factory.GetGrain<IGroupGrain>(ConnectionGrainKey.Build(hubName, groupName));
+		internal IGroupGrain GetGroupGrain(string hubName, string groupName)
+			=> grainFactory.GetGrain<IGroupGrain>(ConnectionGrainKey.Build(hubName, groupName));
 
-	internal static IUserGrain GetUserGrain(this IGrainFactory factory, string hubName, string userId)
-		=> factory.GetGrain<IUserGrain>(ConnectionGrainKey.Build(hubName, userId));
+		internal IUserGrain GetUserGrain(string hubName, string userId)
+			=> grainFactory.GetGrain<IUserGrain>(ConnectionGrainKey.Build(hubName, userId));
 
-	internal static IServerDirectoryGrain GetServerDirectoryGrain(this IGrainFactory factory)
-		=> factory.GetGrain<IServerDirectoryGrain>(0);
+		internal IServerDirectoryGrain GetServerDirectoryGrain()
+			=> grainFactory.GetGrain<IServerDirectoryGrain>(0);
+	}
 }

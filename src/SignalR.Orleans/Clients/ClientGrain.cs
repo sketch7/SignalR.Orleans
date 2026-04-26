@@ -35,7 +35,7 @@ internal class ClientGrain : Grain<ClientState>, IClientGrain
 
 	public override async Task OnActivateAsync(CancellationToken cancellationToken)
 	{
-		_keyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
+		_keyData = new(this.GetPrimaryKeyString());
 		_streamProvider = this.GetStreamProvider(Constants.STREAM_PROVIDER);
 
 		if (State.ServerId == Guid.Empty)
@@ -56,7 +56,7 @@ internal class ClientGrain : Grain<ClientState>, IClientGrain
 			_failAttempts = 0;
 			try
 			{
-				await _serverStream.OnNextAsync(new ClientMessage { ConnectionId = _keyData.Id, Payload = message.Value, HubName = _keyData.HubName });
+				await _serverStream.OnNextAsync(new() { ConnectionId = _keyData.Id, Payload = message.Value, HubName = _keyData.HubName });
 			}
 			catch (Exception ex)
 			{
