@@ -20,7 +20,7 @@ Installation is performed via [NuGet](https://www.nuget.org/packages/Sketch7.Sig
 ## dotnet support
 
 | Version | .NET     | Orleans | Status                                                                                                                                                                                         |
-|---------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.x     | netcore2 | 2.3.5   |                                                                                                                                                                                                |
 | 2.x     | netcore3 | 3.2.0   |                                                                                                                                                                                                |
 | 3.x     | net5     | 3.5.1   |                                                                                                                                                                                                |
@@ -29,6 +29,7 @@ Installation is performed via [NuGet](https://www.nuget.org/packages/Sketch7.Sig
 | 6.x     | net8     | 8.0.0   | [![CI](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml/badge.svg?branch=6.x)](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml) |
 | 7.x     | net8     | 9.0.1   | [![CI](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml/badge.svg?branch=7.x)](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml) |
 | 8.x     | net10    | 9.2.1   | [![CI](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml/badge.svg?branch=8.x)](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml) |
+| 9.x     | net10    | 10.1.0  | [![CI](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml/badge.svg?branch=9.x)](https://github.com/sketch7/SignalR.Orleans/actions/workflows/dotnet-publish.yml) |
 
 From Package Manager:
 

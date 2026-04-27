@@ -1,4 +1,4 @@
-﻿﻿namespace SignalR.Orleans.Core;
+﻿namespace SignalR.Orleans.Core;
 
 public interface IServerDirectoryGrain : IGrainWithIntegerKey
 {
@@ -36,7 +36,7 @@ public class ServerDirectoryGrain : Grain<ServerDirectoryState>, IServerDirector
 		_cleanupTimer = this.RegisterGrainTimer(
 			async _ => await ValidateAndCleanUp(State),
 			State,
-			new GrainTimerCreationOptions
+			new()
 			{
 				DueTime = TimeSpan.FromSeconds(15),
 				Period = TimeSpan.FromMinutes(Constants.SERVERDIRECTORY_CLEANUP_IN_MINUTES)
