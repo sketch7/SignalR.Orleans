@@ -19,8 +19,9 @@ public static class SiloBuilderExtensions
 		configure?.Invoke(cfg);
 
 		builder.AddMemoryGrainStorage(Constants.STORAGE_PROVIDER);
+		// builder.AddMemoryGrainStorage(Constants.PUBSUB_PROVIDER);
 
-		cfg.ConfigureBuilder?.Invoke(builder, new HostBuilderConfig());
+		cfg.ConfigureBuilder?.Invoke(builder, new());
 
 		builder.ConfigureServices(services => services.AddSingleton<IConfigurationValidator, SignalRConfigurationValidator>());
 
@@ -41,16 +42,18 @@ internal sealed class SignalRConfigurationValidator : IConfigurationValidator
 
 	public void ValidateConfiguration()
 	{
-		_logger.LogInformation("Checking if a PubSub storage provider was registered...");
+		_logger.LogInformation("SignalR.Orleans: Verifying PubSub storage provider '{PubSubProvider}' is registered...", Constants.PUBSUB_PROVIDER);
 
 		var pubSubProvider = _sp.GetKeyedService<IGrainStorage>(Constants.PUBSUB_PROVIDER);
 		if (pubSubProvider == null)
 		{
-			const string err = "No PubSub storage provider was registered. You need to register one. To use the default/in-memory provider, call 'siloBuilder.AddMemoryGrainStorage(\"PubSubStore\")' when building your Silo.";
+			const string err = $"SignalR.Orleans: No PubSub storage provider '{Constants.PUBSUB_PROVIDER}' was found. "
+				+ "UseSignalR() registers it automatically with in-memory storage. "
+				+ "If you overrode it, ensure you call 'siloBuilder.AddMemoryGrainStorage(\"PubSubStore\")' (or another provider) when building your silo.";
 			_logger.LogError(err);
 			throw new InvalidOperationException(err);
 		}
 
-		_logger.LogInformation("Found the PubSub storage provider of type {TypeName}.", pubSubProvider.GetType().FullName);
+		_logger.LogInformation("SignalR.Orleans: PubSub storage provider '{PubSubProvider}' found ({TypeName}).", Constants.PUBSUB_PROVIDER, pubSubProvider.GetType().FullName);
 	}
 }
