@@ -21,7 +21,7 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 	private readonly string _hubName;
 	private readonly SemaphoreSlim _streamSetupLock = new(1);
 	private StreamReplicaContainer<ClientMessage> _serverStreamsReplicaContainer;
-	private bool _disposed;
+	private volatile bool _disposed;
 
 	public OrleansHubLifetimeManager(
 		ILogger<OrleansHubLifetimeManager<THub>> logger,
@@ -62,20 +62,27 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 
 	private async Task EnsureStreamSetup()
 	{
-		if (_streamProvider != null)
+		if (_streamProvider != null || _disposed)
 			return;
 
+		var lockTaken = false;
 		try
 		{
 			await _streamSetupLock.WaitAsync();
+			lockTaken = true;
 
-			if (_streamProvider != null)
+			if (_streamProvider != null || _disposed)
 				return;
 			await SetupStreams();
 		}
+		catch (ObjectDisposedException) when (_disposed)
+		{
+			// Dispose raced with initialization.
+		}
 		finally
 		{
-			_streamSetupLock.Release();
+			if (lockTaken)
+				_streamSetupLock.Release();
 		}
 	}
 
