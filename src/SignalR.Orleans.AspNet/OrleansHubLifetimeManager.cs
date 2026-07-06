@@ -16,11 +16,12 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 	private readonly ILogger _logger;
 	private readonly IClusterClient _clusterClient;
 	private readonly Guid _serverId;
-	private IStreamProvider _streamProvider;
+	private volatile IStreamProvider _streamProvider;
 	private IAsyncStream<AllMessage> _allStream;
 	private readonly string _hubName;
 	private readonly SemaphoreSlim _streamSetupLock = new(1);
 	private StreamReplicaContainer<ClientMessage> _serverStreamsReplicaContainer;
+	private volatile bool _disposed;
 
 	public OrleansHubLifetimeManager(
 		ILogger<OrleansHubLifetimeManager<THub>> logger,
@@ -41,6 +42,18 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 		stage: ServiceLifecycleStage.Active,
 		onStart: async cts => await Task.Run(EnsureStreamSetup, cts));
 
+	private async void HeartbeatTick()
+	{
+		try
+		{
+			await HeartbeatCheck();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Heartbeat failed for Orleans HubLifetimeManager {hubName} (serverId: {serverId})", _hubName, _serverId);
+		}
+	}
+
 	private Task HeartbeatCheck()
 	{
 		var client = _clusterClient.GetServerDirectoryGrain();
@@ -49,20 +62,36 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 
 	private async Task EnsureStreamSetup()
 	{
-		if (_streamProvider != null)
+		if (_streamProvider != null || _disposed)
 			return;
 
+		var lockTaken = false;
 		try
 		{
 			await _streamSetupLock.WaitAsync();
+			lockTaken = true;
 
-			if (_streamProvider != null)
+			if (_streamProvider != null || _disposed)
 				return;
 			await SetupStreams();
 		}
+		catch (ObjectDisposedException) when (_disposed)
+		{
+			// Dispose raced with initialization.
+		}
 		finally
 		{
-			_streamSetupLock.Release();
+			if (lockTaken)
+			{
+				try
+				{
+					_streamSetupLock.Release();
+				}
+				catch (ObjectDisposedException) when (_disposed)
+				{
+					// Dispose raced with initialization; the semaphore was disposed while we held it.
+				}
+			}
 		}
 	}
 
@@ -70,39 +99,65 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 	{
 		_logger.LogInformation("Initializing: Orleans HubLifetimeManager {hubName} (serverId: {serverId})...", _hubName, _serverId);
 
+		var streamProvider = _clusterClient.GetStreamProvider(Constants.STREAM_PROVIDER);
+		var serverStreamsReplicaContainer = new StreamReplicaContainer<ClientMessage>(streamProvider, _serverId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
+		var allStream = streamProvider.GetStream<AllMessage>(StreamId.Create(Utils.BuildStreamHubName(_hubName), Constants.ALL_STREAM_ID));
+
 		try
 		{
-			_streamProvider = _clusterClient.GetStreamProvider(Constants.STREAM_PROVIDER);
-			_serverStreamsReplicaContainer = new(_streamProvider, _serverId, Constants.SERVERS_STREAM, Constants.STREAM_SEND_REPLICAS);
-
-			_allStream = _streamProvider.GetStream<AllMessage>(StreamId.Create(Utils.BuildStreamHubName(_hubName), Constants.ALL_STREAM_ID));
-			_timer = new(_ => Task.Run(HeartbeatCheck), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Constants.HEARTBEAT_PULSE_IN_MINUTES));
-
 			var subscribeTasks = new List<Task>
 			{
-				_allStream.SubscribeAsync((msg, _) => ProcessAllMessage(msg)),
-				_serverStreamsReplicaContainer.SubscribeAsync((msg, _) => ProcessServerMessage(msg))
+				allStream.SubscribeAsync((msg, _) => ProcessAllMessage(msg)),
+				serverStreamsReplicaContainer.SubscribeAsync((msg, _) => ProcessServerMessage(msg))
 			};
 
 			await Task.WhenAll(subscribeTasks);
+
+			_serverStreamsReplicaContainer = serverStreamsReplicaContainer;
+			_allStream = allStream;
+			_timer = new Timer(_ => HeartbeatTick(), null, TimeSpan.Zero, TimeSpan.FromMinutes(Constants.HEARTBEAT_PULSE_IN_MINUTES));
+
+			// Assigned last: acts as the readiness gate for EnsureStreamSetup and the Send* paths,
+			// preventing other threads from observing partially-initialized streams.
+			_streamProvider = streamProvider;
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Initialization failed: An error has occurred while initializing Orleans HubLifetimeManager {hubName} (serverId: {serverId})", _hubName, _serverId);
 
-			_streamProvider = null;
-			_serverStreamsReplicaContainer = null;
-			_allStream = null;
-			if (_timer != null)
-			{
-				await _timer.DisposeAsync();
-				_timer = null;
-			}
+			// Best-effort cleanup so partially-established subscriptions don't leak before a retry.
+			await TryUnsubscribe(allStream);
+			await TryUnsubscribe(serverStreamsReplicaContainer);
 
 			throw;
 		}
 
 		_logger.LogInformation("Initialized complete: Orleans HubLifetimeManager {hubName} (serverId: {serverId})", _hubName, _serverId);
+	}
+
+	private async Task TryUnsubscribe(IAsyncStream<AllMessage> stream)
+	{
+		try
+		{
+			await stream.UnsubscribeAllSubscriptionHandlers();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to clean up stream subscriptions for {hubName} (serverId: {serverId})", _hubName, _serverId);
+		}
+	}
+
+	private async Task TryUnsubscribe(StreamReplicaContainer<ClientMessage> container)
+	{
+		try
+		{
+			var handles = await container.GetAllSubscriptionHandles();
+			await Task.WhenAll(handles.Select(h => h.UnsubscribeAsync()));
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to clean up replica stream subscriptions for {hubName} (serverId: {serverId})", _hubName, _serverId);
+		}
 	}
 
 	private Task ProcessAllMessage(AllMessage message)
@@ -178,17 +233,19 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 		}
 	}
 
-	public override Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
+	public override async Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
 	{
+		await EnsureStreamSetup();
 		var message = new InvocationMessage(methodName, args);
-		return _allStream.OnNextAsync(new() { Payload = message });
+		await _allStream.OnNextAsync(new() { Payload = message });
 	}
 
-	public override Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
+	public override async Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
 		CancellationToken cancellationToken = default)
 	{
+		await EnsureStreamSetup();
 		var message = new InvocationMessage(methodName, args);
-		return _allStream.OnNextAsync(new() { Payload = message, ExcludedIds = excludedConnectionIds });
+		await _allStream.OnNextAsync(new() { Payload = message, ExcludedIds = excludedConnectionIds });
 	}
 
 	public override Task SendConnectionAsync(string connectionId, string methodName, object[] args,
@@ -253,7 +310,7 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 	public override Task SendUsersAsync(IReadOnlyList<string> userIds, string methodName, object[] args,
 		CancellationToken cancellationToken = default)
 	{
-		var tasks = userIds.Select(u => SendGroupAsync(u, methodName, args, cancellationToken));
+		var tasks = userIds.Select(u => SendUserAsync(u, methodName, args, cancellationToken));
 		return Task.WhenAll(tasks);
 	}
 
@@ -286,25 +343,42 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 
 	public async ValueTask DisposeAsync()
 	{
-		var toUnsubscribe = new List<Task>();
-		if (_serverStreamsReplicaContainer != null)
-		{
-			var subscriptions = await _serverStreamsReplicaContainer.GetAllSubscriptionHandles();
-			toUnsubscribe.AddRange(subscriptions.Select(s => s.UnsubscribeAsync()));
-		}
+		if (_disposed)
+			return;
+		_disposed = true;
 
-		if (_allStream != null)
-		{
-			var subscriptions = await _allStream.GetAllSubscriptionHandles();
-			toUnsubscribe.AddRange(subscriptions.Select(s => s.UnsubscribeAsync()));
-		}
+		GC.SuppressFinalize(this);
 
-		var serverDirectoryGrain = _clusterClient.GetServerDirectoryGrain();
-		toUnsubscribe.Add(serverDirectoryGrain.Unregister(_serverId));
-
-		await Task.WhenAll(toUnsubscribe.ToArray());
-
+		// Stop heartbeats first so the server is not re-registered while tearing down.
 		if (_timer != null)
 			await _timer.DisposeAsync();
+
+		try
+		{
+			var toUnsubscribe = new List<Task>();
+			if (_serverStreamsReplicaContainer != null)
+			{
+				var subscriptions = await _serverStreamsReplicaContainer.GetAllSubscriptionHandles();
+				toUnsubscribe.AddRange(subscriptions.Select(s => s.UnsubscribeAsync()));
+			}
+
+			if (_allStream != null)
+			{
+				var subscriptions = await _allStream.GetAllSubscriptionHandles();
+				toUnsubscribe.AddRange(subscriptions.Select(s => s.UnsubscribeAsync()));
+			}
+
+			toUnsubscribe.Add(_clusterClient.GetServerDirectoryGrain().Unregister(_serverId));
+
+			await Task.WhenAll(toUnsubscribe);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Error while disposing Orleans HubLifetimeManager {hubName} (serverId: {serverId})", _hubName, _serverId);
+		}
+		finally
+		{
+			_streamSetupLock.Dispose();
+		}
 	}
 }
