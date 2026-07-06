@@ -38,23 +38,26 @@ internal static class StreamReplicaExtensions
 		return streamProvider.GetStream<T>(StreamId.Create(ns, streamId.ToString()));
 	}
 
-	public static async Task ResumeAllSubscriptionHandlers<T>(this IAsyncStream<T> stream, Func<T, StreamSequenceToken, Task> onNextAsync)
+	extension<T>(IAsyncStream<T> stream)
 	{
-		var subscriptions = await stream.GetAllSubscriptionHandles();
-		if (subscriptions?.Count > 0)
+		public async Task ResumeAllSubscriptionHandlers(Func<T, StreamSequenceToken, Task> onNextAsync)
 		{
-			var tasks = subscriptions.Select(x => x.ResumeAsync(onNextAsync));
-			await Task.WhenAll(tasks);
+			var subscriptions = await stream.GetAllSubscriptionHandles();
+			if (subscriptions?.Count > 0)
+			{
+				var tasks = subscriptions.Select(x => x.ResumeAsync(onNextAsync));
+				await Task.WhenAll(tasks);
+			}
 		}
-	}
 
-	public static async Task UnsubscribeAllSubscriptionHandlers<T>(this IAsyncStream<T> stream)
-	{
-		var subscriptions = await stream.GetAllSubscriptionHandles();
-		if (subscriptions?.Count > 0)
+		public async Task UnsubscribeAllSubscriptionHandlers()
 		{
-			var tasks = subscriptions.Select(x => x.UnsubscribeAsync());
-			await Task.WhenAll(tasks);
+			var subscriptions = await stream.GetAllSubscriptionHandles();
+			if (subscriptions?.Count > 0)
+			{
+				var tasks = subscriptions.Select(x => x.UnsubscribeAsync());
+				await Task.WhenAll(tasks);
+			}
 		}
 	}
 }
@@ -71,7 +74,7 @@ internal class StreamReplicaContainer<T>
 	public string StreamNamespace { get; }
 	public int MaxReplicas { get; }
 
-	private readonly List<IAsyncStream<T>> _streams = new();
+	private readonly List<IAsyncStream<T>> _streams = [];
 
 	/// <summary>
 	/// Create a new instance of stream with replicas.

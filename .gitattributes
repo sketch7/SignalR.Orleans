@@ -1,0 +1,6 @@
+# Enforce LF line endings everywhere — oxfmt writes LF and is not configurable.
+# This prevents CRLF/LF churn on Windows checkouts.
+* text=auto eol=lf
+
+# Lockfiles — keep LF, mark as generated for diff/PR collapsing
+pnpm-lock.yaml -diff linguist-generated=true

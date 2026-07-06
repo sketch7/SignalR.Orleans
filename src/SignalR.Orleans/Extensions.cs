@@ -5,19 +5,22 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OrleansClientExtensions
 {
-	public static IClientBuilder UseSignalR(this IClientBuilder builder, Action<SignalrClientConfig> config)
+	extension(IClientBuilder builder)
 	{
-		var cfg = new SignalrClientConfig();
-		config?.Invoke(cfg);
+		public IClientBuilder UseSignalR(Action<SignalrClientConfig> config)
+		{
+			var cfg = new SignalrClientConfig();
+			config?.Invoke(cfg);
 
-		return builder.UseSignalR(cfg);
-	}
+			return builder.UseSignalR(cfg);
+		}
 
-	public static IClientBuilder UseSignalR(this IClientBuilder builder, SignalrClientConfig config = null)
-	{
-		if (config == null)
-			config = new SignalrClientConfig();
+		public IClientBuilder UseSignalR(SignalrClientConfig config = null)
+		{
+			if (config == null)
+				config = new();
 
-		return builder.AddMemoryStreams(Constants.STREAM_PROVIDER);
+			return builder.AddMemoryStreams(Constants.STREAM_PROVIDER);
+		}
 	}
 }

@@ -26,14 +26,14 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 
 	public override async Task OnActivateAsync(CancellationToken cancellationToken)
 	{
-		KeyData = new ConnectionGrainKey(this.GetPrimaryKeyString());
+		KeyData = new(this.GetPrimaryKeyString());
 		_logger.LogInformation("Activate {hubName} ({groupId})", KeyData.HubName, KeyData.Id);
 		_streamProvider = this.GetStreamProvider(Constants.STREAM_PROVIDER);
 
 		_cleanupTimer = this.RegisterGrainTimer(
 			async _ => await CleanupStreams(),
 			State,
-			new GrainTimerCreationOptions
+			new()
 			{
 				DueTime = _cleanupPeriod,
 				Period = _cleanupPeriod
@@ -104,7 +104,7 @@ internal abstract class ConnectionGrain<TGrainState> : Grain<TGrainState>, IConn
 
 	public Task SendExcept(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds)
 	{
-		var message = new Immutable<InvocationMessage>(new InvocationMessage(methodName, args));
+		var message = new Immutable<InvocationMessage>(new(methodName, args));
 		return SendAll(message, State.Connections.Where(x => !excludedConnectionIds.Contains(x)).ToList());
 	}
 
