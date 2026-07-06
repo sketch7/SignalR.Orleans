@@ -82,7 +82,16 @@ public class OrleansHubLifetimeManager<THub> : HubLifetimeManager<THub>, IAsyncD
 		finally
 		{
 			if (lockTaken)
-				_streamSetupLock.Release();
+			{
+				try
+				{
+					_streamSetupLock.Release();
+				}
+				catch (ObjectDisposedException) when (_disposed)
+				{
+					// Dispose raced with initialization; the semaphore was disposed while we held it.
+				}
+			}
 		}
 	}
 
