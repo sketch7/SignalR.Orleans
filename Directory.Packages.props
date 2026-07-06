@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
-    <OrleansVersion>10.2.0</OrleansVersion>
+    <OrleansVersion>10.2.1</OrleansVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- system -->
