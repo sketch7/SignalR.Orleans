@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "arcane-ci-cd-workflows": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-ci-cd-workflows/SKILL.md",
+      "computedHash": "c270d50b157ed95c8bdc6a5fca3ecb08639adb24bb9eba9e365024a134f1de89"
+    },
+    "arcane-conventional-commit": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-conventional-commit/SKILL.md",
+      "computedHash": "8d806a0151c155345085179b053aa62bbfbd2d6781a5c7d5eab2200f89497c17"
+    },
+    "arcane-docs-style": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-docs-style/SKILL.md",
+      "computedHash": "39a0cebb9dd2b3dbdab05414f394bbe224fc3747842ca038142c8acab7941244"
+    },
+    "arcane-dotnet-conventions": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-dotnet-conventions/SKILL.md",
+      "computedHash": "cddbf1b6eb8e0839bf67ae21a77300e062ea0f27eb37a7241997b8bc078122dc"
+    },
+    "arcane-dotnet-testing": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-dotnet-testing/SKILL.md",
+      "computedHash": "e055e634af458c95fcd5a99a81f0d93502dcf19a4843c56d28e83f88a6ac00b8"
+    },
+    "arcane-testing-principles": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-testing-principles/SKILL.md",
+      "computedHash": "884eafd9f45254b4b87cb285bb24baf533df5cbc467da0ad5bb6402c46fafe11"
+    }
+  }
+}
