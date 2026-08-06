@@ -68,6 +68,8 @@ npm-debug.log
 .claude/skills/
 agent/
 .superpowers
+.playwright-mcp
+
 
 # Visual Studio Code
 .vscode/*
