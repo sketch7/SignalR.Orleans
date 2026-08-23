@@ -8,6 +8,10 @@ on:
       - "workflow"
     paths-ignore:
       - "**.md"
+      - ".agents/**"
+      - ".claude/**"
+      - ".codex/**"
+      - "skills-lock.json"
 
   workflow_dispatch:
     inputs:
@@ -58,13 +62,11 @@ jobs:
   release:
     name: Release
     needs: publish
-    # Only when a stable (non-prerelease) version was published — i.e. on push to v* branches
-    if: |
-      needs.publish.result == 'success' &&
-      !fromJSON(needs.publish.outputs.isPrerelease)
+    if: needs.publish.result == 'success'
     uses: sketch7/.github/.github/workflows/create-release.yml@release-v1
     with:
       version: ${{ needs.publish.outputs.version }}
+      is-prerelease: ${{ fromJSON(needs.publish.outputs.isPrerelease) }}
 
   bump-main:
     name: Bump main
