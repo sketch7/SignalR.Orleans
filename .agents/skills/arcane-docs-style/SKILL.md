@@ -3,6 +3,8 @@ name: arcane-docs-style
 description: "Use when writing or reviewing TSDoc/JSDoc comments, README files, or docs/<feature>.md pages in an Arcane TypeScript/JavaScript package (ngx libraries, schematics, blueprint.client, cosmowrench, or any other consumer) — covers example-first doc-block style, en-US spelling, README structure (install + snippet, use-when/avoid-when bullets vs. API tables), when to extract a feature section into its own docs file, and mermaid diagram conventions including the pastel color palette."
 ---
 
+> **Source of truth: this repo (`sketch7/arcane.archives`).** Edit here, then run `npx skills update` in consuming repos. Never edit the installed copy under a consumer repo's `.agents/skills/<name>/` — it's a pulled artifact and gets silently overwritten on the next sync.
+
 # Arcane Docs Style
 
 ## Principles
@@ -79,7 +81,7 @@ export function useSelector(...) {}
 
 - Opening a doc block with "This function/component..." instead of stating what it does.
 - One giant `@example` covering three scenarios instead of three tagged `@example` blocks.
-- Explaining *how* a hook subscribes/re-renders instead of *what* it returns and *when* to use it.
+- Explaining _how_ a hook subscribes/re-renders instead of _what_ it returns and _when_ to use it.
 - A table of every export instead of use-when/avoid-when bullets, "just because that's how API
   docs usually look" — reach for the table only when readers need to scan structured columns.
 - British spelling (`serialised`, `colour`, `behaviour`) leaking in from habit or a pasted snippet.

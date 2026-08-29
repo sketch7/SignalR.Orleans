@@ -5,37 +5,43 @@
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-ci-cd-workflows/SKILL.md",
-      "computedHash": "c270d50b157ed95c8bdc6a5fca3ecb08639adb24bb9eba9e365024a134f1de89"
+      "computedHash": "76a887c16a674783b188f48e3d1cdb25d97edf0f8eebd613184ad64020a45d1d"
     },
     "arcane-conventional-commit": {
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-conventional-commit/SKILL.md",
-      "computedHash": "8d806a0151c155345085179b053aa62bbfbd2d6781a5c7d5eab2200f89497c17"
+      "computedHash": "8207b99098843b279ed8af1d4111f989ff13d63a82fdffa099adbfcaa8ae60e0"
     },
     "arcane-docs-style": {
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-docs-style/SKILL.md",
-      "computedHash": "39a0cebb9dd2b3dbdab05414f394bbe224fc3747842ca038142c8acab7941244"
+      "computedHash": "5fe58cb0eef2ca6b3bac873ca596340271af8133691e261fc6a49fcc7aa34ea4"
     },
     "arcane-dotnet-conventions": {
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-dotnet-conventions/SKILL.md",
-      "computedHash": "cddbf1b6eb8e0839bf67ae21a77300e062ea0f27eb37a7241997b8bc078122dc"
+      "computedHash": "3df1907600e92bf02da62a1e7c60998d8cf2d4e23aa3f23adcb9d8fe85e0e50c"
     },
     "arcane-dotnet-testing": {
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-dotnet-testing/SKILL.md",
-      "computedHash": "e055e634af458c95fcd5a99a81f0d93502dcf19a4843c56d28e83f88a6ac00b8"
+      "computedHash": "b2dd07978ab363772adb0b314314e615024eb415e4dc7975b938b2e387ab202a"
+    },
+    "arcane-git-workflow": {
+      "source": "sketch7/arcane.archives",
+      "sourceType": "github",
+      "skillPath": "skills/arcane-git-workflow/SKILL.md",
+      "computedHash": "3b6f8ddfc6087e1c27d505061f5b557c78e6532cfa70c6bea11b80f11c080cd8"
     },
     "arcane-testing-principles": {
       "source": "sketch7/arcane.archives",
       "sourceType": "github",
       "skillPath": "skills/arcane-testing-principles/SKILL.md",
-      "computedHash": "884eafd9f45254b4b87cb285bb24baf533df5cbc467da0ad5bb6402c46fafe11"
+      "computedHash": "6e20bda04ca2a4fcde1b2be418fccb146348586fa3fbdf1c259e5b9990c7158e"
     }
   }
 }

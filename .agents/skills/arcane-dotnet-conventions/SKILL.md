@@ -3,6 +3,8 @@ name: arcane-dotnet-conventions
 description: "Use when writing or reviewing general-purpose C# code in an Arcane .NET repo (arcane.dotnet, hexgate, vault, foundry, gemstone, blueprint, cosmowrench.api) — covers language target, formatting (method chaining, constructor parameters, expression bodies), naming (record vs sealed class), guard clauses, C# 14 extension blocks, and extension-method namespace placement. For test conventions see arcane-dotnet-testing; for ErrorResult/ApiErrorException error handling see arcane-dotnet-errors; for controller/CQRS/DI conventions see arcane-dotnet-aspnet-conventions; for the .NET SSR frontend-host shell (blueprint.client, cosmowrench) see arcane-dotnet-fe."
 ---
 
+> **Source of truth: this repo (`sketch7/arcane.archives`).** Edit here, then run `npx skills update` in consuming repos. Never edit the installed copy under a consumer repo's `.agents/skills/<name>/` — it's a pulled artifact and gets silently overwritten on the next sync.
+
 # Arcane .NET Conventions
 
 C# language and formatting conventions for Arcane .NET services, as practiced in `arcane.dotnet` —
