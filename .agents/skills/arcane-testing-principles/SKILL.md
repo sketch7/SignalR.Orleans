@@ -3,6 +3,8 @@ name: arcane-testing-principles
 description: "Use when writing, reviewing, or planning unit/integration tests in any Arcane repo, regardless of stack (.NET, Angular/ngx, Node, or otherwise). Covers cutting test boilerplate via shared helpers, preferring data-driven/table tests over near-duplicate cases, League of Legends-themed test fixtures, RED-GREEN TDD discipline, testing at module boundaries instead of every internal unit, and pruning tests that don't earn their keep. For .NET syntax/tooling see arcane-dotnet-testing; for Angular/ngx syntax/tooling see arcane-ngx-testing."
 ---
 
+> **Source of truth: this repo (`sketch7/arcane.archives`).** Edit here, then run `npx skills update` in consuming repos. Never edit the installed copy under a consumer repo's `.agents/skills/<name>/` — it's a pulled artifact and gets silently overwritten on the next sync.
+
 # Arcane Testing Principles
 
 Cross-stack testing philosophy for the Arcane platform. These are judgment calls that don't
@@ -19,7 +21,7 @@ instead. Prefer a helper function over an instance field or base-class field for
 fixture class (`IClassFixture<T>`, a custom render wrapper) when the setup is genuinely expensive
 (spinning up a host, a container, a store) — not as a default.
 
-Don't extract when the variation *is* the thing under test — a helper that hides the one line that
+Don't extract when the variation _is_ the thing under test — a helper that hides the one line that
 differs between two tests defeats the point of the test.
 
 ## 2. Prefer data-driven tests over near-duplicate cases
@@ -61,7 +63,7 @@ meaningful tests: one boundary test covers what three internal-method tests woul
 with more coupling to implementation.
 
 This doesn't mean "only write integration tests" — a "module" can be as small as one class with a
-real public API. It means picking the seam at the *public* contract, not at every method.
+real public API. It means picking the seam at the _public_ contract, not at every method.
 
 ## 6. Once it's green, ask whether it should exist
 

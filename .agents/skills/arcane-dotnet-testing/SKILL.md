@@ -3,6 +3,8 @@ name: arcane-dotnet-testing
 description: "Use when writing or reviewing .NET unit/integration tests in an Arcane repo (arcane.dotnet, hexgate, vault, foundry, gemstone, blueprint, cosmowrench.api). Covers xUnit + Shouldly conventions, the FluentAssertions-to-Shouldly migration status per repo, Subject_WhenCondition_ExpectedOutcome naming, Theory/InlineData data-driven tests, boilerplate-avoiding test helpers, async Task rules, and test-double placement. For framework-agnostic judgment (module boundaries, pruning tests, League of Legends theming) see arcane-testing-principles; for WebApplicationFactory/Testcontainers integration-test host setup and controller/CQRS conventions see arcane-dotnet-aspnet-conventions."
 ---
 
+> **Source of truth: this repo (`sketch7/arcane.archives`).** Edit here, then run `npx skills update` in consuming repos. Never edit the installed copy under a consumer repo's `.agents/skills/<name>/` — it's a pulled artifact and gets silently overwritten on the next sync.
+
 # Arcane .NET Testing
 
 Unit- and integration-test conventions for Arcane's .NET services, as actually practiced in
@@ -15,13 +17,13 @@ Unit- and integration-test conventions for Arcane's .NET services, as actually p
 The platform is mid-migration off FluentAssertions (went non-OSS) onto **Shouldly** (BSD-3), driven
 by `arcane.dotnet/docs/testing-refactor-plan.md`. Don't assume every repo has finished:
 
-| Repo | Status |
-|---|---|
-| `arcane.dotnet` | Target: xUnit + **Shouldly** + Moq only. Some older tests still use `Assert.*`/FluentAssertions — migrating them is in scope, don't add more. |
-| `hexgate` | Already fully xUnit + Shouldly, no FA/Moq. |
-| `vault`, `foundry`, `gemstone` | No FA/Moq found in sampled tests — consistent with Shouldly, but these repos have no written testing-instructions file; AGENTS.md is the only documented source. |
-| `blueprint` | Split: `*.Management.Store.Test` (unit layer) still **FluentAssertions + Moq**; `*.Management.Server.Tests` (integration layer, `WebApplicationFactory` + `Testcontainers.MsSql`) already **Shouldly**. |
-| `cosmowrench.api` | Store-layer unit tests still **FluentAssertions**. |
+| Repo                           | Status                                                                                                                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `arcane.dotnet`                | Target: xUnit + **Shouldly** + Moq only. Some older tests still use `Assert.*`/FluentAssertions — migrating them is in scope, don't add more.                                                           |
+| `hexgate`                      | Already fully xUnit + Shouldly, no FA/Moq.                                                                                                                                                              |
+| `vault`, `foundry`, `gemstone` | No FA/Moq found in sampled tests — consistent with Shouldly, but these repos have no written testing-instructions file; AGENTS.md is the only documented source.                                        |
+| `blueprint`                    | Split: `*.Management.Store.Test` (unit layer) still **FluentAssertions + Moq**; `*.Management.Server.Tests` (integration layer, `WebApplicationFactory` + `Testcontainers.MsSql`) already **Shouldly**. |
+| `cosmowrench.api`              | Store-layer unit tests still **FluentAssertions**.                                                                                                                                                      |
 
 **Rule:** in a repo that's already on Shouldly, never introduce `FluentAssertions`/new `Assert.*`
 calls. In a repo still on FluentAssertions (blueprint's Store layer, cosmowrench.api's Store
@@ -31,15 +33,15 @@ unrelated change.
 
 Substitution cheat-sheet when migrating or writing fresh Shouldly code:
 
-| FluentAssertions / xUnit Assert | Shouldly |
-|---|---|
-| `result.Should().Be(x)` | `result.ShouldBe(x)` |
-| `Assert.Equal(expected, actual)` | `actual.ShouldBe(expected)` (⚠️ argument order flips) |
-| `action.Should().Throw<T>()` | `Should.Throw<T>(() => action())` |
-| async throw | `await Should.ThrowAsync<T>(...)` |
-| `result.Should().BeOfType<T>()` | `result.ShouldBeOfType<T>()` |
-| `collection.Should().Contain(x => ...)` | `collection.ShouldContain(predicate)` |
-| `x.Should().BeEquivalentTo(y)` | `x.ShouldBeEquivalentTo(y)` (structural; no FA member-exclusion options — verify nothing relied on those) |
+| FluentAssertions / xUnit Assert         | Shouldly                                                                                                  |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `result.Should().Be(x)`                 | `result.ShouldBe(x)`                                                                                      |
+| `Assert.Equal(expected, actual)`        | `actual.ShouldBe(expected)` (⚠️ argument order flips)                                                     |
+| `action.Should().Throw<T>()`            | `Should.Throw<T>(() => action())`                                                                         |
+| async throw                             | `await Should.ThrowAsync<T>(...)`                                                                         |
+| `result.Should().BeOfType<T>()`         | `result.ShouldBeOfType<T>()`                                                                              |
+| `collection.Should().Contain(x => ...)` | `collection.ShouldContain(predicate)`                                                                     |
+| `x.Should().BeEquivalentTo(y)`          | `x.ShouldBeEquivalentTo(y)` (structural; no FA member-exclusion options — verify nothing relied on those) |
 
 ## 1. Naming: `Subject_WhenCondition_ExpectedOutcome`
 
@@ -89,7 +91,7 @@ of inventing new generic ones).
 Extract repeated setup (seen more than twice) into a **local static factory helper** — prefer this
 over instance fields for stateless setup. Reach for `IClassFixture<T>` only for genuinely expensive
 shared fixtures (`WebApplicationFactory`, a Testcontainers-backed factory) — not as the default for
-ordinary setup. Don't extract when the setup variation between tests *is* what's under test.
+ordinary setup. Don't extract when the setup variation between tests _is_ what's under test.
 
 ## 5. Async: always `async Task`, never `async void`
 
